@@ -9,7 +9,6 @@ interface DocumentUploaderProps {
   documents: MedicalDocument[];
   currentLang: Language;
   onUploadCustomDoc: (files: File[]) => void;
-  onLoadSampleData: () => void;
   isProcessing: boolean;
 }
 
@@ -17,7 +16,6 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   documents,
   currentLang,
   onUploadCustomDoc,
-  onLoadSampleData,
   isProcessing
 }) => {
   const t = TRANSLATIONS[currentLang];
