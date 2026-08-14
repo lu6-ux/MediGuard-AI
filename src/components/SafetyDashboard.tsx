@@ -3,6 +3,7 @@
 import React from 'react';
 import { ShieldAlert, AlertTriangle, CheckCircle, Info, Pill, FileText, Stethoscope, AlertOctagon, HelpCircle } from 'lucide-react';
 import { SafetyAlert, MedicalRiskScore } from '@/types/medical';
+import { DoctorRecommender } from './DoctorRecommender';
 
 interface SafetyDashboardProps {
   alerts: SafetyAlert[];
@@ -112,6 +113,9 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
 
         </div>
       </div>
+
+      {/* Local Doctor Recommendation (Shown for any risk to ensure visibility during demo) */}
+      <DoctorRecommender flagContext={alerts.length > 0 ? alerts[0].type : 'general'} />
 
       {/* Safety Alerts List */}
       <div className="space-y-4">
