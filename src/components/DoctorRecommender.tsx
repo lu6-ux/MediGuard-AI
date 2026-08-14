@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Calendar, Search, Stethoscope, Star, Phone, Navigation, AlertCircle, Crosshair } from 'lucide-react';
+import { MapPin, Calendar, Search, Stethoscope, Star, Phone, Navigation, AlertCircle, Crosshair, Map } from 'lucide-react';
 
 interface DoctorResult {
   id: string;
@@ -225,9 +225,14 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-              {results.map((doc) => (
-                <div key={doc.id} className="p-4 rounded-xl border border-slate-700 bg-slate-950 hover:border-blue-500/50 transition-colors">
-                  <h4 className="font-bold text-white text-sm truncate" title={doc.name}>{doc.name}</h4>
+              {results.map((doc, index) => (
+                <div key={doc.id} className="p-4 rounded-xl border border-slate-700 bg-slate-950 hover:border-blue-500/50 transition-colors relative overflow-hidden">
+                  {index === 0 && userCoords && (
+                    <div className="absolute top-0 right-0 bg-emerald-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                      ✨ Closest Match
+                    </div>
+                  )}
+                  <h4 className="font-bold text-white text-sm truncate pr-20" title={doc.name}>{doc.name}</h4>
                   <p className="text-xs text-blue-400 font-medium mt-0.5 truncate">{doc.specialty}</p>
                   
                   <div className="mt-2.5 space-y-1.5">
@@ -251,14 +256,25 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-1.5 text-xs text-slate-300">
-                      <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                      {doc.phone !== 'Phone not available' ? (
-                        <a href={`tel:${doc.phone.replace(/[^0-9+]/g, '')}`} className="text-emerald-400 hover:text-emerald-300 font-medium underline underline-offset-2 transition-colors">
-                          Call Doctor ({doc.phone})
-                        </a>
-                      ) : (
-                        <span>N/A</span>
+                    <div className="flex items-center space-x-4 pt-1">
+                      <div className="flex items-center space-x-1.5 text-xs text-slate-300">
+                        <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        {doc.phone !== 'Phone not available' ? (
+                          <a href={`tel:${doc.phone.replace(/[^0-9+]/g, '')}`} className="text-emerald-400 hover:text-emerald-300 font-medium underline underline-offset-2 transition-colors">
+                            Call Clinic
+                          </a>
+                        ) : (
+                          <span>N/A</span>
+                        )}
+                      </div>
+
+                      {doc.lat && doc.lng && (
+                        <div className="flex items-center space-x-1.5 text-xs text-slate-300">
+                          <Map className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+                          <a href={`https://www.google.com/maps/dir/?api=1&destination=${doc.lat},${doc.lng}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 font-medium underline underline-offset-2 transition-colors">
+                            Get Directions
+                          </a>
+                        </div>
                       )}
                     </div>
                   </div>
