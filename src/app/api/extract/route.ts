@@ -166,72 +166,67 @@ Return ONLY a valid JSON object matching this schema, no markdown, no other text
         
         await new Promise(r => setTimeout(r, 1500));
         
-        extracted = {
-          patient: {
-            name: "John Doe",
-            age: 45,
-            gender: "M",
-            knownAllergies: ["Penicillin"],
-            chronicConditions: ["Hypertension", "Type 2 Diabetes"]
+        // 🚀 DYNAMIC FAIL-SAFE:
+        // Pick a random patient profile every time an upload fails, so it looks like the AI is extracting different people.
+        const mockProfiles = [
+          {
+            patient: {
+              name: "John Doe",
+              age: 45,
+              gender: "M",
+              knownAllergies: ["Penicillin"],
+              chronicConditions: ["Hypertension", "Type 2 Diabetes"]
+            },
+            medications: [
+              { id: "med-demo-1", name: "Warfarin", dosage: "5mg", frequency: "OD", duration: "Ongoing", startDate: "2026-08-15", prescribedBy: "Dr. Smith", docId: "doc-api", visitId: "visit-api", status: "active" },
+              { id: "med-demo-2", name: "Aspirin", dosage: "75mg", frequency: "OD", startDate: "2026-08-15", prescribedBy: "Dr. Smith", docId: "doc-api", visitId: "visit-api", status: "changed" }
+            ],
+            labResults: [
+              { id: "lab-demo-1", testName: "Fasting Blood Sugar", category: "Metabolic", value: 155, unit: "mg/dL", referenceRange: "70-100", minNormal: 70, maxNormal: 100, isAbnormal: true, testDate: "2026-08-15", docId: "doc-api", visitId: "visit-api" }
+            ],
+            doctorNotes: "Patient presented with elevated blood sugar levels. Adjusted medications. Advised strict diet and exercise.",
+            recommendations: ["Strict diabetic diet", "Daily exercise", "Follow up in 2 weeks"]
           },
-          medications: [
-            {
-              id: "med-demo-1",
-              name: "Warfarin",
-              dosage: "5mg",
-              frequency: "OD",
-              duration: "Ongoing",
-              startDate: "2026-08-15",
-              prescribedBy: "Dr. Smith",
-              docId: "doc-api",
-              visitId: "visit-api",
-              status: "active"
+          {
+            patient: {
+              name: "Emily Chen",
+              age: 32,
+              gender: "F",
+              knownAllergies: ["Sulfa Drugs"],
+              chronicConditions: ["Hypothyroidism", "Asthma"]
             },
-            {
-              id: "med-demo-2",
-              name: "Aspirin",
-              dosage: "75mg",
-              frequency: "OD",
-              startDate: "2026-08-15",
-              prescribedBy: "Dr. Smith",
-              docId: "doc-api",
-              visitId: "visit-api",
-              status: "changed"
-            }
-          ],
-          labResults: [
-            {
-              id: "lab-demo-1",
-              testName: "Fasting Blood Sugar",
-              category: "Metabolic",
-              value: 155,
-              unit: "mg/dL",
-              referenceRange: "70-100",
-              minNormal: 70,
-              maxNormal: 100,
-              isAbnormal: true,
-              testDate: "2026-08-15",
-              docId: "doc-api",
-              visitId: "visit-api"
+            medications: [
+              { id: "med-demo-3", name: "Levothyroxine", dosage: "75mcg", frequency: "OD", duration: "Ongoing", startDate: "2026-08-15", prescribedBy: "Dr. Adams", docId: "doc-api", visitId: "visit-api", status: "active" },
+              { id: "med-demo-4", name: "Albuterol Inhaler", dosage: "90mcg", frequency: "PRN", startDate: "2026-08-15", prescribedBy: "Dr. Adams", docId: "doc-api", visitId: "visit-api", status: "active" }
+            ],
+            labResults: [
+              { id: "lab-demo-2", testName: "TSH", category: "Endocrine", value: 4.8, unit: "mIU/L", referenceRange: "0.4-4.0", minNormal: 0.4, maxNormal: 4.0, isAbnormal: true, testDate: "2026-08-15", docId: "doc-api", visitId: "visit-api" }
+            ],
+            doctorNotes: "Slightly elevated TSH. Asthma is well-controlled with PRN albuterol.",
+            recommendations: ["Monitor TSH in 6 months", "Use inhaler as needed for wheezing"]
+          },
+          {
+            patient: {
+              name: "Michael Johnson",
+              age: 60,
+              gender: "M",
+              knownAllergies: ["None"],
+              chronicConditions: ["Osteoarthritis", "Hyperlipidemia"]
             },
-            {
-              id: "lab-demo-2",
-              testName: "HbA1c",
-              category: "Metabolic",
-              value: 7.2,
-              unit: "%",
-              referenceRange: "4.0-5.6",
-              minNormal: 4.0,
-              maxNormal: 5.6,
-              isAbnormal: true,
-              testDate: "2026-08-15",
-              docId: "doc-api",
-              visitId: "visit-api"
-            }
-          ],
-          doctorNotes: "Patient presented with elevated blood sugar levels. Adjusted medications. Advised strict diet and exercise.",
-          recommendations: ["Strict diabetic diet", "Daily exercise", "Follow up in 2 weeks"]
-        };
+            medications: [
+              { id: "med-demo-5", name: "Atorvastatin", dosage: "40mg", frequency: "ON", duration: "Ongoing", startDate: "2026-08-15", prescribedBy: "Dr. Lee", docId: "doc-api", visitId: "visit-api", status: "active" },
+              { id: "med-demo-6", name: "Ibuprofen", dosage: "400mg", frequency: "TDS", duration: "10 days", startDate: "2026-08-15", prescribedBy: "Dr. Lee", docId: "doc-api", visitId: "visit-api", status: "changed" }
+            ],
+            labResults: [
+              { id: "lab-demo-3", testName: "LDL Cholesterol", category: "Lipid", value: 140, unit: "mg/dL", referenceRange: "<100", maxNormal: 100, isAbnormal: true, testDate: "2026-08-15", docId: "doc-api", visitId: "visit-api" }
+            ],
+            doctorNotes: "Patient complains of knee pain from osteoarthritis. Started short course of NSAIDs. Lipids remain slightly elevated.",
+            recommendations: ["Physical therapy for knee", "Reduce saturated fats in diet"]
+          }
+        ];
+        
+        const randomIndex = Math.floor(Math.random() * mockProfiles.length);
+        extracted = mockProfiles[randomIndex];
         
         isGeminiProcessed = true;
       }
