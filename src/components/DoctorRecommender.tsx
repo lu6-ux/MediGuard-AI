@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Calendar, Search, Stethoscope, Star, Phone, Navigation, AlertCircle, Crosshair, Map } from 'lucide-react';
+import { MapPin, Calendar, Search, Stethoscope, Star, Phone, Navigation, AlertCircle, Crosshair, Map, Clock } from 'lucide-react';
 
 interface DoctorResult {
   id: string;
@@ -36,7 +36,8 @@ interface DoctorRecommenderProps {
 
 export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContext }) => {
   const [location, setLocation] = useState('');
-  const [availability, setAvailability] = useState('This Week');
+  const [availability, setAvailability] = useState('');
+  const [time, setTime] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<DoctorResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -174,16 +175,28 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
           />
         </div>
         
-        <div className="relative flex-1 sm:max-w-[250px]">
-          <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
-            type="datetime-local"
-            value={availability === 'This Week' ? '' : availability}
-            onChange={(e) => setAvailability(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 appearance-none [color-scheme:dark]"
-            min={new Date().toISOString().slice(0, 16)}
-            required
-          />
+        <div className="flex flex-1 gap-2 sm:max-w-[300px]">
+          <div className="relative flex-1">
+            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="date"
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+              className="w-full pl-9 pr-2 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 appearance-none [color-scheme:dark]"
+              min={new Date().toISOString().split('T')[0]}
+              required
+            />
+          </div>
+          <div className="relative flex-1">
+            <Clock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full pl-9 pr-2 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 appearance-none [color-scheme:dark]"
+              required
+            />
+          </div>
         </div>
 
         <button
