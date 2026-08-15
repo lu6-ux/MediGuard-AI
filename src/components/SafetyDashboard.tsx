@@ -2,36 +2,39 @@
 
 import React from 'react';
 import { ShieldAlert, AlertTriangle, CheckCircle, Info, Pill, FileText, Stethoscope, AlertOctagon, HelpCircle } from 'lucide-react';
-import { SafetyAlert, MedicalRiskScore } from '@/types/medical';
+import { SafetyAlert, MedicalRiskScore, Language } from '@/types/medical';
 import { DoctorRecommender } from './DoctorRecommender';
+import { TRANSLATIONS } from '@/lib/i18n/translations';
 
 interface SafetyDashboardProps {
   alerts: SafetyAlert[];
   riskScore: MedicalRiskScore;
+  currentLang?: Language;
 }
 
-export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskScore }) => {
+export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskScore, currentLang = 'en' }) => {
+  const t = TRANSLATIONS[currentLang];
   const getSeverityBadge = (severity: 'high' | 'warning' | 'info') => {
     switch (severity) {
       case 'high':
         return (
           <span className="px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-extrabold flex items-center space-x-1">
             <AlertOctagon className="h-3.5 w-3.5" />
-            <span>CRITICAL HIGH RISK</span>
+            <span>{t.safetyCriticalHighRisk}</span>
           </span>
         );
       case 'warning':
         return (
           <span className="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center space-x-1">
             <AlertTriangle className="h-3.5 w-3.5" />
-            <span>WARNING FLAG</span>
+            <span>{t.safetyWarningFlag}</span>
           </span>
         );
       default:
         return (
           <span className="px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-medium flex items-center space-x-1">
             <Info className="h-3.5 w-3.5" />
-            <span>INFORMATIONAL</span>
+            <span>{t.safetyInformational}</span>
           </span>
         );
     }
@@ -77,13 +80,13 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
 
             <div>
               <span className="text-xs uppercase tracking-wider font-bold text-slate-400">
-                Overall Medication Safety Score
+                {t.safetyOverallScore}
               </span>
               <h3 className={`text-xl font-black mt-0.5 ${riskScore.score < 60 ? 'text-rose-400' : riskScore.score < 85 ? 'text-amber-400' : 'text-emerald-400'}`}>
                 {riskScore.riskLevel}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                Evaluated from {alerts.length} total safety checks
+                {t.safetyEvaluatedFrom} {alerts.length} {t.safetyTotalChecks}
               </p>
             </div>
           </div>
@@ -91,22 +94,22 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
           {/* Quick Stats Breakdown */}
           <div className="lg:col-span-2 space-y-3">
             <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-xs leading-relaxed">
-              <strong className="font-bold text-rose-300">Safety Analysis Summary: </strong>
+              <strong className="font-bold text-rose-300">{t.safetySummaryTitle} </strong>
               {riskScore.summary}
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                 <span className="block text-lg font-black text-rose-400">{riskScore.highRiskCount}</span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase">High Risk Flags</span>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase">{t.highRiskAlerts}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                 <span className="block text-lg font-black text-amber-400">{riskScore.warningCount}</span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase">Warnings</span>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase">{t.warningAlerts}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                 <span className="block text-lg font-black text-emerald-400">{alerts.length}</span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase">Total Analyzed</span>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase">{t.safetyTotalAnalyzed}</span>
               </div>
             </div>
           </div>
@@ -115,13 +118,13 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
       </div>
 
       {/* Local Doctor Recommendation (Shown for any risk to ensure visibility during demo) */}
-      <DoctorRecommender flagContext={alerts.length > 0 ? alerts[0].type : 'general'} />
+      <DoctorRecommender flagContext={alerts.length > 0 ? alerts[0].type : 'general'} currentLang={currentLang} />
 
       {/* Safety Alerts List */}
       <div className="space-y-4">
         <h3 className="text-base font-bold text-white flex items-center space-x-2">
           <ShieldAlert className="h-5 w-5 text-rose-400" />
-          <span>Cross-Check Prescription Flags ({alerts.length})</span>
+          <span>{t.safetyCrossCheckFlags} ({alerts.length})</span>
         </h3>
 
         {alerts.map((alert) => (
@@ -154,7 +157,7 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
             {/* Evidence Quotes */}
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 mb-4 space-y-1.5">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Documented Evidence & Source Citations:
+                {t.safetyEvidenceCitations}
               </span>
               {alert.evidence.map((item, idx) => (
                 <div key={idx} className="text-xs text-slate-300 flex items-start space-x-2">
@@ -168,7 +171,7 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
             <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-start space-x-2.5">
               <Stethoscope className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-bold text-emerald-400">Clinical Recommendation: </strong>
+                <strong className="font-bold text-emerald-400">{t.safetyClinicalRecommendation} </strong>
                 <span>{alert.recommendation}</span>
               </div>
             </div>

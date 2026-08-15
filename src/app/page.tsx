@@ -237,6 +237,7 @@ Allergies: Penicillin`;
             <SafetyDashboard
               alerts={safetyData.alerts}
               riskScore={safetyData.riskScore}
+              currentLang={currentLang}
             />
 
             <LabTrendVisualizer
@@ -253,6 +254,7 @@ Allergies: Penicillin`;
           <SafetyDashboard
             alerts={safetyData.alerts}
             riskScore={safetyData.riskScore}
+            currentLang={currentLang}
           />
         )}
 

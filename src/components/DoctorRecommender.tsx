@@ -30,11 +30,16 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return d.toFixed(1);
 }
 
+import { Language } from '@/types/medical';
+import { TRANSLATIONS } from '@/lib/i18n/translations';
+
 interface DoctorRecommenderProps {
   flagContext: string; // E.g., 'allergy_contradiction', 'drug_interaction', 'lab_abnormality'
+  currentLang?: Language;
 }
 
-export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContext }) => {
+export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContext, currentLang = 'en' }) => {
+  const t = TRANSLATIONS[currentLang];
   const [location, setLocation] = useState('');
   const [availability, setAvailability] = useState('');
   const [time, setTime] = useState('');
@@ -138,12 +143,11 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
     <div className="mt-4 p-5 rounded-2xl border border-blue-500/30 bg-slate-900/90 shadow-lg">
       <div className="flex items-center space-x-2 mb-3">
         <Stethoscope className="h-5 w-5 text-blue-400" />
-        <h3 className="text-lg font-bold text-white">Find a Local Specialist</h3>
+        <h3 className="text-lg font-bold text-white">{t.doctorFindSpecialist}</h3>
       </div>
       
       <p className="text-sm text-slate-300 mb-5 leading-relaxed">
-        We detected a high-risk issue. We recommend consulting a <strong>{specialty}</strong> to review this. 
-        Where are you located?
+        {t.doctorHighRiskIssue1} <strong>{specialty}</strong> {t.doctorHighRiskIssue2}
       </p>
 
       <div className="flex justify-end mb-2">
@@ -158,7 +162,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
           ) : (
              <Crosshair className="h-3 w-3" />
           )}
-          <span>{isLocating ? 'Locating...' : 'Use My Location'}</span>
+          <span>{isLocating ? t.doctorLocating : t.doctorUseMyLocation}</span>
         </button>
       </div>
 
@@ -167,7 +171,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
           <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="City or Area (e.g., Colombo)"
+            placeholder={t.doctorCityPlaceholder}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
@@ -207,12 +211,12 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
           {isSearching ? (
             <span className="flex items-center space-x-2">
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Searching...</span>
+              <span>{t.doctorSearching}</span>
             </span>
           ) : (
             <span className="flex items-center space-x-2">
               <Search className="h-4 w-4" />
-              <span>Find Doctors</span>
+              <span>{t.doctorFindDoctorsBtn}</span>
             </span>
           )}
         </button>
@@ -231,8 +235,8 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
         <div className="space-y-3">
           {results.length === 0 ? (
             <div className="text-center py-6 px-4 border border-slate-800 rounded-xl bg-slate-950">
-              <p className="text-slate-400 text-sm">No clinics found nearby matching your criteria.</p>
-              <p className="text-slate-500 text-xs mt-1">Try widening your search area or checking spelling.</p>
+              <p className="text-slate-400 text-sm">{t.doctorNoClinicsFound}</p>
+              <p className="text-slate-500 text-xs mt-1">{t.doctorTryWidening}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -240,7 +244,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
                 <div key={doc.id} className="p-4 rounded-xl border border-slate-700 bg-slate-950 hover:border-blue-500/50 transition-colors relative overflow-hidden">
                   {index === 0 && userCoords && (
                     <div className="absolute top-0 right-0 bg-emerald-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
-                      ✨ Closest Match
+                      {t.doctorClosestMatch}
                     </div>
                   )}
                   <h4 className="font-bold text-white text-sm truncate pr-20" title={doc.name}>{doc.name}</h4>
@@ -272,7 +276,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
                         <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
                         {doc.phone !== 'Phone not available' ? (
                           <a href={`tel:${doc.phone.replace(/[^0-9+]/g, '')}`} className="text-emerald-400 hover:text-emerald-300 font-medium underline underline-offset-2 transition-colors">
-                            Call Clinic
+                            {t.doctorCallClinic}
                           </a>
                         ) : (
                           <span>N/A</span>
@@ -283,7 +287,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
                         <div className="flex items-center space-x-1.5 text-xs text-slate-300">
                           <Map className="h-3.5 w-3.5 shrink-0 text-blue-400" />
                           <a href={`https://www.google.com/maps/dir/?api=1&destination=${doc.lat},${doc.lng}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 font-medium underline underline-offset-2 transition-colors">
-                            Get Directions
+                            {t.doctorGetDirections}
                           </a>
                         </div>
                       )}
@@ -300,8 +304,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
       <div className="mt-4 pt-3 border-t border-slate-800 text-[10px] text-slate-500 flex items-start space-x-1.5 leading-tight">
         <AlertCircle className="h-3 w-3 shrink-0 text-slate-400" />
         <p>
-          <strong>Disclaimer:</strong> This tool points you to a suitable local doctor based on public directories. 
-          It does not make a diagnosis. Always consult a certified healthcare professional for medical advice.
+          {t.doctorDisclaimer}
         </p>
       </div>
     </div>
