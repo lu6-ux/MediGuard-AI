@@ -187,8 +187,17 @@ export function extractStructuredData(rawText: string, docId: string, visitId: s
     });
   }
 
-  // Summary / Doctor Notes
-  const doctorNotes = rawText.slice(0, 300) + "...";
+  // Summary / Doctor Notes (with OCR Gibberish Detection)
+  let doctorNotes = rawText.slice(0, 300);
+  
+  // Heuristic: If more than 15% of the characters are non-alphanumeric (excluding spaces/basic punctuation), 
+  // it's likely a bad OCR read of handwriting.
+  const specialCharCount = (doctorNotes.match(/[^a-zA-Z0-9\s.,;\-:]/g) || []).length;
+  if (doctorNotes.length > 0 && specialCharCount / doctorNotes.length > 0.15) {
+    doctorNotes = "[Handwritten notes could not be cleanly digitized by the OCR engine]";
+  } else {
+    doctorNotes = doctorNotes + "...";
+  }
 
   return {
     patient,
