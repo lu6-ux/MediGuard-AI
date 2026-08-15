@@ -17,7 +17,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
     {
       id: "msg-welcome",
       sender: "ai",
-      text: "Hello! I am your MediGuard AI Assistant. I have indexed your uploaded medical documents across all visits. Ask me anything about your prescriptions, drug interactions, lab trends, or medical history.",
+      text: t.chatWelcome,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       confidenceScore: 99,
       disclaimer: t.disclaimerText
@@ -27,10 +27,10 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
   const [isThinking, setIsThinking] = useState(false);
 
   const sampleQuestions = [
-    "Did my new medication get prescribed despite my allergy?",
-    "What changed between my first and latest visit?",
-    "Which test results are getting worse over time?",
-    "List all medicines I currently take."
+    t.chatQ1,
+    t.chatQ2,
+    t.chatQ3,
+    t.chatQ4
   ];
 
   const handleSend = (textToSend?: string) => {
@@ -77,13 +77,13 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
           </div>
           <div>
             <h2 className="text-base font-bold text-white flex items-center space-x-2">
-              <span>RAG Multi-Document Reasoning Assistant</span>
+              <span>{t.chatTitle}</span>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/10 text-teal-300 border border-teal-500/20">
-                {documents.length} Docs Indexed
+                {documents.length} {t.chatDocsIndexed}
               </span>
             </h2>
             <p className="text-xs text-slate-400">
-              Cross-references allergy records, prescriptions, and lab tests across visits
+              {t.chatSubtitle}
             </p>
           </div>
         </div>
@@ -92,7 +92,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
       {/* Suggested Quick Questions */}
       <div className="space-y-2">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-          Suggested Medical Queries:
+          {t.chatSuggested}
         </span>
         <div className="flex flex-wrap gap-2">
           {sampleQuestions.map((q, idx) => (
@@ -182,7 +182,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
         {isThinking && (
           <div className="flex items-center space-x-2 text-xs text-slate-400 p-2">
             <Sparkles className="h-4 w-4 text-emerald-400 animate-spin" />
-            <span>Analyzing multi-document vector index & evaluating medical safety...</span>
+            <span>{t.chatAnalyzing}</span>
           </div>
         )}
       </div>

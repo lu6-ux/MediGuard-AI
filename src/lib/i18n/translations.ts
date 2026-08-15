@@ -30,6 +30,16 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     disclaimerText: "MediGuard AI provides computational safety screening and informational analysis. It does NOT provide medical diagnosis or treatment. Always consult your physician or pharmacist.",
     downloadSummary: "Download PDF Health Summary",
     settingsTitle: "AI Model & API Configuration",
+    chatWelcome: "Hello! I am your MediGuard AI Assistant. I have indexed your uploaded medical documents across all visits. Ask me anything about your prescriptions, drug interactions, lab trends, or medical history.",
+    chatTitle: "RAG Multi-Document Reasoning Assistant",
+    chatDocsIndexed: "Docs Indexed",
+    chatSubtitle: "Cross-references allergy records, prescriptions, and lab tests across visits",
+    chatSuggested: "Suggested Medical Queries:",
+    chatQ1: "Did my new medication get prescribed despite my allergy?",
+    chatQ2: "What changed between my first and latest visit?",
+    chatQ3: "Which test results are getting worse over time?",
+    chatQ4: "List all medicines I currently take.",
+    chatAnalyzing: "Analyzing multi-document vector index & evaluating medical safety..."
   },
   si: {
     appTitle: "MediGuard AI",
@@ -60,6 +70,16 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     disclaimerText: "MediGuard AI යනු තොරතුරුමය විශ්ලේෂණ පද්ධතියකි. එය වෛද්‍ය විනිශ්චයක් හෝ ප්‍රතිකාරයක් නොවේ. සෑම විටම වෛද්‍යවරයකු හමුවන්න.",
     downloadSummary: "PDF සාරාංශය බාගත කරන්න",
     settingsTitle: "AI සැකසුම්",
+    chatWelcome: "ආයුබෝවන්! මම ඔබගේ MediGuard AI සහායකයා වෙමි. මම ඔබ උඩුගත කළ සියලුම වෛද්‍ය වාර්තා සුචිගත කර ඇත්තෙමි. ඔබගේ ඖෂධ, අතුරු ආබාධ හෝ වෛද්‍ය ඉතිහාසය ගැන ඕනෑම දෙයක් මගෙන් අසන්න.",
+    chatTitle: "RAG බහු-ලේඛන තර්කන සහායක",
+    chatDocsIndexed: "ලේඛන සුචිගත කර ඇත",
+    chatSubtitle: "සියලුම වෛද්‍ය හමුවීම්වල අසාත්මිකතා, ඖෂධ සහ රසායනාගාර පරීක්ෂණ හරස් යොමු කරයි",
+    chatSuggested: "යෝජිත වෛද්‍ය ප්‍රශ්න:",
+    chatQ1: "මගේ ආසාත්මිකතා තිබියදීත් මට නව ඖෂධයක් නියම කර තිබේද?",
+    chatQ2: "මගේ පළමු සහ අවසාන වෛද්‍ය හමුවීම අතර වෙනස් වී ඇත්තේ කුමක්ද?",
+    chatQ3: "කාලයත් සමඟ නරක අතට හැරෙන පරීක්ෂණ ප්‍රතිඵල මොනවාද?",
+    chatQ4: "මා දැනට ලබා ගන්නා සියලුම ඖෂධ ලැයිස්තුගත කරන්න.",
+    chatAnalyzing: "බහු-ලේඛන දෛශික දර්ශකය විශ්ලේෂණය කිරීම සහ වෛද්‍ය ආරක්ෂාව ඇගයීම..."
   },
   ta: {
     appTitle: "MediGuard AI",
@@ -90,5 +110,15 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     disclaimerText: "MediGuard AI என்பது தகவல்களுக்கான பகுப்பாய்வு அமைப்பாகும். இது மருத்துவ நோயறிதல் அல்ல. எப்போதும் மருத்துவரை அணுகவும்.",
     downloadSummary: "PDF சுருக்கத்தைப் பதிவிறக்கவும்",
     settingsTitle: "AI அமைப்புகள்",
+    chatWelcome: "வணக்கம்! நான் உங்கள் MediGuard AI உதவியாளர். நீங்கள் பதிவேற்றிய அனைத்து மருத்துவ ஆவணங்களையும் நான் அட்டவணைப்படுத்தியுள்ளேன். உங்கள் மருந்துகள், மருந்து இடைவினைகள், ஆய்வக போக்குகள் அல்லது மருத்துவ வரலாறு பற்றி என்னிடம் எதையும் கேளுங்கள்.",
+    chatTitle: "RAG பல-ஆவண பகுத்தறிவு உதவியாளர்",
+    chatDocsIndexed: "ஆவணங்கள் குறியிடப்பட்டுள்ளன",
+    chatSubtitle: "அனைத்து மருத்துவ வருகைகளிலும் உள்ள ஒவ்வாமை பதிவுகள், மருந்துகள் மற்றும் ஆய்வக சோதனைகளை ஒப்பிடுகிறது",
+    chatSuggested: "பரிந்துரைக்கப்பட்ட மருத்துவ கேள்விகள்:",
+    chatQ1: "எனது ஒவ்வாமை இருந்தபோதிலும் எனக்கு புதிய மருந்து பரிந்துரைக்கப்பட்டதா?",
+    chatQ2: "எனது முதல் மற்றும் சமீபத்திய வருகைக்கு இடையில் என்ன மாறியுள்ளது?",
+    chatQ3: "காலப்போக்கில் எந்த சோதனை முடிவுகள் மோசமாகி வருகின்றன?",
+    chatQ4: "நான் தற்போது எடுத்துக் கொள்ளும் அனைத்து மருந்துகளையும் பட்டியலிடுங்கள்.",
+    chatAnalyzing: "பல-ஆவண வெக்டார் குறியீட்டைப் பகுப்பாய்வு செய்தல் மற்றும் மருத்துவ பாதுகாப்பை மதிப்பிடுதல்..."
   }
 };
