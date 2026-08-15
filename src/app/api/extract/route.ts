@@ -56,8 +56,7 @@ export async function POST(request: NextRequest) {
     let extracted: Record<string, any> = {};
 
     if (savedProvider === 'gemini') {
-      try {
-        console.log(`Using Gemini API (Vision) with fetch fallback for AQ keys...`);
+      console.log(`Using Gemini API (Vision) with fetch fallback for AQ keys...`);
         
         let prompt = `You are a medical data extraction AI. Extract the structured medical data from this medical document (image). 
 Return ONLY a valid JSON object matching this schema, no markdown, no other text:
@@ -156,9 +155,9 @@ Return ONLY a valid JSON object matching this schema, no markdown, no other text
 
         extracted = JSON.parse(jsonString);
         isGeminiProcessed = true;
-      }
-
-      return NextResponse.json({ data: extracted });
+    }
+      
+    return NextResponse.json({ data: extracted });
     
   } catch (error: any) {
     console.error('Gemini Extraction Error:', error);
