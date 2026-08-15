@@ -67,8 +67,13 @@ export default function Home() {
           let extracted: any = null;
           let isGeminiProcessed = false;
           
-          const savedProvider = localStorage.getItem('aiProvider') || 'hybrid';
+          let savedProvider = localStorage.getItem('aiProvider') || 'hybrid';
           const savedApiKey = localStorage.getItem('geminiApiKey') || '';
+          
+          // Idiot-proof: if they pasted an API key but forgot to click the Gemini button, force Gemini!
+          if (savedApiKey && savedApiKey.length > 10) {
+            savedProvider = 'gemini';
+          }
           
           console.log(`Processing file: ${file.name}, Type: ${file.type}, Provider: ${savedProvider}, Key length: ${savedApiKey.length}`);
           
