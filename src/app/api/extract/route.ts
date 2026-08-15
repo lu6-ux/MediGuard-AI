@@ -40,6 +40,15 @@ export async function POST(request: NextRequest) {
           docId: string; // Use "doc-api"
           visitId: string; // Use "visit-api"
           status: "active" | "changed" | "discontinued";
+        }[];
+        doctorNotes: string; // Any general clinical notes, findings, or advice
+        recommendations?: string[];
+      }
+
+      Ensure the JSON is perfectly valid and contains no markdown formatting outside of the JSON structure itself.
+      Only return the JSON.
+    `;
+
     const savedProvider = 'gemini';
     const file = { type: mimeType || 'image/jpeg' };
     
