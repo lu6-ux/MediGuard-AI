@@ -137,16 +137,22 @@ Allergies: Penicillin`;
             });
             
             if (!response.ok) {
-               const errorData = await response.json();
-               console.error("Gemini API Error for " + file.name + ":", errorData);
-               alert(`Gemini API Error for ${file.name}: ${errorData.error || 'Unknown error'}`);
-               continue;
+               console.warn("Gemini API Error, falling back to Client-Side OCR for: " + file.name);
+               
+               if (file.type.startsWith('image/')) {
+                 console.log(`Extracting text from image via Tesseract Fallback: ${file.name}`);
+                 const { data } = await Tesseract.recognize(file, 'eng');
+                 text = data.text;
+               } else {
+                 text = await file.text();
+               }
+               // Let it fall through to local Regex extraction
+            } else {
+               const result = await response.json();
+               extracted = result.data;
+               isGeminiProcessed = true;
+               text = extracted.doctorNotes || "Extracted perfectly via Gemini Vision";
             }
-            
-            const result = await response.json();
-            extracted = result.data;
-            isGeminiProcessed = true;
-            text = extracted.doctorNotes || "Extracted perfectly via Gemini Vision";
           }
           else if (file.type.startsWith('image/')) {
             console.log(`Extracting text from image via Tesseract: ${file.name}`);
