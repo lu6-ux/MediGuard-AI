@@ -15,8 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-
+    
     const prompt = `
       You are an expert medical data extraction AI.
       Read the attached medical document (prescription, lab report, or doctor note).
@@ -65,15 +64,44 @@ export async function POST(request: NextRequest) {
       Only return the JSON.
     `;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: base64Image,
-          mimeType: mimeType || 'image/jpeg'
-        }
+    const modelsToTry = [
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-1.5-flash-8b',
+      'gemini-1.0-pro-vision-latest',
+      'gemini-pro-vision'
+    ];
+
+    let result = null;
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Trying model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        
+        result = await model.generateContent([
+          prompt,
+          {
+            inlineData: {
+              data: base64Image,
+              mimeType: mimeType || 'image/jpeg'
+            }
+          }
+        ]);
+        
+        // If we get here, the model worked! Break the loop.
+        break;
+      } catch (err: any) {
+        console.warn(`Model ${modelName} failed:`, err.message);
+        lastError = err;
+        // Continue to the next model in the array
       }
-    ]);
+    }
+
+    if (!result) {
+      throw lastError || new Error("All Gemini models failed.");
+    }
 
     const response = await result.response;
     const text = response.text();
