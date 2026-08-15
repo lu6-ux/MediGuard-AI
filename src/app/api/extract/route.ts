@@ -169,25 +169,31 @@ Return ONLY a valid JSON object matching this schema, no markdown, no other text
         // 🚀 TESSERACT OCR FALLBACK:
         // The user requested REAL data extraction even if the Gemini API is completely blocked.
         // We will run a local Tesseract.js OCR pass and use Regex to find Name and Age.
-        console.log("Running Tesseract OCR Fallback...");
-        const Tesseract = require('tesseract.js');
-        
-        const dataUri = `data:${mimeType};base64,${base64Image}`;
-        const { data: { text } } = await Tesseract.recognize(dataUri, 'eng');
-        console.log("OCR Text Extracted:", text);
-
-        // Regex parsing
         let patientName = "no name found";
         let age = 0;
+        
+        try {
+          console.log("Running Tesseract OCR Fallback...");
+          const Tesseract = require('tesseract.js');
+          
+          const dataUri = `data:${mimeType};base64,${base64Image}`;
+          const { data: { text } } = await Tesseract.recognize(dataUri, 'eng');
+          console.log("OCR Text Extracted:", text);
 
-        const nameMatch = text.match(/(?:Name|Patient)[\s:]+([A-Za-z\s]+)(?=\n|Age|Date|Sex|Gender)/i);
-        if (nameMatch && nameMatch[1].trim()) {
-          patientName = nameMatch[1].trim();
-        }
+          // Regex parsing
+          const nameMatch = text.match(/(?:Name|Patient)[\s:]+([A-Za-z\s]+)(?=\n|Age|Date|Sex|Gender)/i);
+          if (nameMatch && nameMatch[1].trim()) {
+            patientName = nameMatch[1].trim();
+          }
 
-        const ageMatch = text.match(/(?:Age|Yrs|Years)[\s:]*(\d+)/i);
-        if (ageMatch && ageMatch[1]) {
-          age = parseInt(ageMatch[1], 10);
+          const ageMatch = text.match(/(?:Age|Yrs|Years)[\s:]*(\d+)/i);
+          if (ageMatch && ageMatch[1]) {
+            age = parseInt(ageMatch[1], 10);
+          }
+        } catch (ocrError) {
+          console.error("OCR Fallback completely failed:", ocrError);
+          // OCR failed (likely due to Vercel Serverless environment limits).
+          // Fall back to "no name found" as requested by user.
         }
 
         extracted = {
