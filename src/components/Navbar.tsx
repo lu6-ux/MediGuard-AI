@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { ShieldAlert, Stethoscope, Globe, Settings, FileText, Activity } from 'lucide-react';
+import { ShieldAlert, Stethoscope, Globe, Settings, FileText, Activity, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 import { Language } from '@/types/medical';
 import { TRANSLATIONS } from '@/lib/i18n/translations';
 
@@ -87,6 +88,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 த
               </button>
             </div>
+
+            {/* Documentation Link */}
+            <Link
+              href="/docs"
+              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition"
+              title="Documentation"
+            >
+              <BookOpen className="h-5 w-5" />
+            </Link>
 
             {/* Settings Modal Button */}
             <button

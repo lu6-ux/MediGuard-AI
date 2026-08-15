@@ -174,14 +174,14 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
           />
         </div>
         
-        <div className="relative flex-1 sm:max-w-[200px]">
+        <div className="relative flex-1 sm:max-w-[250px]">
           <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
-            type="date"
+            type="datetime-local"
             value={availability === 'This Week' ? '' : availability}
             onChange={(e) => setAvailability(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 appearance-none [color-scheme:dark]"
-            min={new Date().toISOString().split('T')[0]}
+            min={new Date().toISOString().slice(0, 16)}
             required
           />
         </div>
