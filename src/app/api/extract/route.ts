@@ -156,50 +156,9 @@ Return ONLY a valid JSON object matching this schema, no markdown, no other text
 
         extracted = JSON.parse(jsonString);
         isGeminiProcessed = true;
-
-      } catch (geminiError: any) {
-        console.error("Gemini failed, falling back to local extraction:", geminiError);
-        
-        let patientName = "no name found";
-        let age = 0;
-        
-        if (fileName) {
-          // Remove extension
-          const cleanName = fileName.replace(/\.[^/.]+$/, "");
-          // Match patterns like "John Doe 45" or "Emily_Chen_32"
-          const match = cleanName.match(/([A-Za-z\s_]+)[\s_-]*(\d+)?/);
-          
-          if (match && match[1]) {
-            const extractedStr = match[1].replace(/_/g, ' ').trim();
-            // Ignore generic filenames like "image" or "1"
-            if (extractedStr.length > 2 && extractedStr.toLowerCase() !== "image") {
-              patientName = extractedStr;
-            }
-          }
-          if (match && match[2]) {
-            age = parseInt(match[2], 10);
-          }
-        }
-
-        extracted = {
-          patient: {
-            name: patientName,
-            age: age,
-            gender: "Unknown",
-            knownAllergies: [],
-            chronicConditions: []
-          },
-          medications: [],
-          labResults: [],
-          doctorNotes: "OCR Fallback used. Medication and Lab Result extraction is limited without advanced AI.",
-          recommendations: []
-        };
-        
-        isGeminiProcessed = true;
       }
-    }
 
-    return NextResponse.json({ data: extracted });
+      return NextResponse.json({ data: extracted });
     
   } catch (error: any) {
     console.error('Gemini Extraction Error:', error);
