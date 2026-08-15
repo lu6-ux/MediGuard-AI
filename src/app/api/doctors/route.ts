@@ -15,8 +15,9 @@ export async function POST(req: Request) {
     }
 
     // Prepare the search query
-    // E.g., "cardiologist in Colombo"
-    const searchQuery = `${specialty} in ${location}`;
+    // E.g., "cardiologist in Colombo, Sri Lanka"
+    // We explicitly append "Sri Lanka" to prevent Google Maps from returning hospitals in nearby countries (e.g. India)
+    const searchQuery = `${specialty} in ${location}, Sri Lanka`;
 
     const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
