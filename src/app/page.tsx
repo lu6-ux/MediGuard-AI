@@ -131,7 +131,8 @@ Allergies: Penicillin`;
               body: JSON.stringify({
                 base64Image,
                 mimeType: mimeType || 'image/jpeg',
-                apiKey: savedApiKey
+                apiKey: savedApiKey,
+                fileName: file.name
               })
             });
             
