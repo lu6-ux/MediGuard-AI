@@ -59,20 +59,23 @@ export default function Home() {
       const newProcessedDocs: MedicalDocument[] = [];
 
       for (const file of files) {
-        // Skip hidden files or non-supported types if any
-        if (file.name.startsWith('.')) continue;
+        try {
+          // Skip hidden files or non-supported types if any
+          if (file.name.startsWith('.')) continue;
 
-        let text = "";
-        let extracted: any = null;
-        let isGeminiProcessed = false;
-        
-        const savedProvider = localStorage.getItem('aiProvider') || 'hybrid';
-        const savedApiKey = localStorage.getItem('geminiApiKey') || '';
-        
-        // 🚀 DEMO FAST-PATH: If the file name contains "demo", bypass slow OCR for an instant presentation!
-        if (file.name.toLowerCase().includes('demo')) {
-          console.log(`⚡ Demo Fast-Path activated for: ${file.name}`);
-          text = `Patient: John Doe
+          let text = "";
+          let extracted: any = null;
+          let isGeminiProcessed = false;
+          
+          const savedProvider = localStorage.getItem('aiProvider') || 'hybrid';
+          const savedApiKey = localStorage.getItem('geminiApiKey') || '';
+          
+          console.log(`Processing file: ${file.name}, Type: ${file.type}, Provider: ${savedProvider}, Key length: ${savedApiKey.length}`);
+          
+          // 🚀 DEMO FAST-PATH: If the file name contains "demo", bypass slow OCR for an instant presentation!
+          if (file.name.toLowerCase().includes('demo')) {
+            console.log(`⚡ Demo Fast-Path activated for: ${file.name}`);
+            text = `Patient: John Doe
 Date: 2026-08-15
 Doctor: Dr. Smith (Cardiology)
 
@@ -87,87 +90,106 @@ HbA1c: 7.2%
 Serum Creatinine: 1.4 mg/dL (Elevated)
 
 Allergies: Penicillin`;
-          
-          // Simulate a tiny 800ms loading delay for UI realism
-          await new Promise(r => setTimeout(r, 800));
-        } 
-        else if (savedProvider === 'gemini' && savedApiKey && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
-          console.log(`⚡ Sending file to Gemini API: ${file.name}`);
-          
-          const base64Image = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-              const b64 = reader.result?.toString().split(',')[1] || '';
-              resolve(b64);
-            };
-            reader.onerror = error => reject(error);
-          });
-          
-          const response = await fetch('/api/extract', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              base64Image,
-              mimeType: file.type,
-              apiKey: savedApiKey
-            })
-          });
-          
-          if (!response.ok) {
-             const errorData = await response.json();
-             console.error("Gemini API Error:", errorData);
-             throw new Error(errorData.error || 'Gemini API failed');
-          }
-          
-          const result = await response.json();
-          extracted = result.data;
-          isGeminiProcessed = true;
-          text = extracted.doctorNotes || "Extracted perfectly via Gemini Vision";
-        }
-        else if (file.type.startsWith('image/')) {
-          console.log(`Extracting text from image: ${file.name}`);
-          const { data } = await Tesseract.recognize(file, 'eng');
-          text = data.text;
-        } else {
-          text = await file.text();
-        }
-        
-        const parsed = parseDocumentContent(text || file.name, file.name);
-        
-        const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
-        const newVisitId = `visit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+            
+            // Simulate a tiny 800ms loading delay for UI realism
+            await new Promise(r => setTimeout(r, 800));
+          } 
+          else if (savedProvider === 'gemini') {
+            if (!savedApiKey) {
+              alert(`Cannot process ${file.name} with Gemini: API Key is missing. Please check Settings.`);
+              continue; // Skip this file
+            }
+            
+            console.log(`⚡ Sending file to Gemini API: ${file.name}`);
+            
+            // Fallback for file types on Windows that might be empty
+            let mimeType = file.type;
+            if (!mimeType) {
+              if (file.name.toLowerCase().endsWith('.pdf')) mimeType = 'application/pdf';
+              else if (file.name.toLowerCase().endsWith('.png')) mimeType = 'image/png';
+              else if (file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg')) mimeType = 'image/jpeg';
+            }
 
-        if (!isGeminiProcessed) {
-          extracted = extractStructuredData(
-            parsed.rawText, 
-            newDocId, 
-            newVisitId, 
-            parsed.visitDate, 
-            parsed.doctorName
-          );
-        } else {
-          // Sync generated DocIds with Gemini's raw JSON
-          if (extracted.medications) {
-             extracted.medications = extracted.medications.map((m: any) => ({...m, docId: newDocId, visitId: newVisitId}));
+            const base64Image = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              reader.onload = () => {
+                const b64 = reader.result?.toString().split(',')[1] || '';
+                resolve(b64);
+              };
+              reader.onerror = error => reject(error);
+            });
+            
+            const response = await fetch('/api/extract', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                base64Image,
+                mimeType: mimeType || 'image/jpeg',
+                apiKey: savedApiKey
+              })
+            });
+            
+            if (!response.ok) {
+               const errorData = await response.json();
+               console.error("Gemini API Error for " + file.name + ":", errorData);
+               alert(`Gemini API Error for ${file.name}: ${errorData.error || 'Unknown error'}`);
+               continue;
+            }
+            
+            const result = await response.json();
+            extracted = result.data;
+            isGeminiProcessed = true;
+            text = extracted.doctorNotes || "Extracted perfectly via Gemini Vision";
           }
-          if (extracted.labResults) {
-             extracted.labResults = extracted.labResults.map((l: any) => ({...l, docId: newDocId, visitId: newVisitId}));
+          else if (file.type.startsWith('image/')) {
+            console.log(`Extracting text from image via Tesseract: ${file.name}`);
+            const { data } = await Tesseract.recognize(file, 'eng');
+            text = data.text;
+          } else {
+            console.log(`Extracting raw text: ${file.name}`);
+            text = await file.text();
           }
-        }
+          
+          const parsed = parseDocumentContent(text || file.name, file.name);
+          
+          const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+          const newVisitId = `visit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
 
-        newProcessedDocs.push({
-          id: newDocId,
-          fileName: file.name,
-          docType: parsed.docType,
-          visitDate: parsed.visitDate,
-          doctorName: parsed.doctorName,
-          healthcareProvider: parsed.healthcareProvider,
-          rawText: parsed.rawText,
-          extractedData: extracted,
-          status: 'processed',
-          uploadDate: new Date().toISOString()
-        });
+          if (!isGeminiProcessed) {
+            extracted = extractStructuredData(
+              parsed.rawText, 
+              newDocId, 
+              newVisitId, 
+              parsed.visitDate, 
+              parsed.doctorName
+            );
+          } else {
+            // Sync generated DocIds with Gemini's raw JSON
+            if (extracted.medications) {
+               extracted.medications = extracted.medications.map((m: any) => ({...m, docId: newDocId, visitId: newVisitId}));
+            }
+            if (extracted.labResults) {
+               extracted.labResults = extracted.labResults.map((l: any) => ({...l, docId: newDocId, visitId: newVisitId}));
+            }
+          }
+
+          newProcessedDocs.push({
+            id: newDocId,
+            fileName: file.name,
+            docType: parsed.docType,
+            visitDate: parsed.visitDate,
+            doctorName: parsed.doctorName,
+            healthcareProvider: parsed.healthcareProvider,
+            rawText: parsed.rawText,
+            extractedData: extracted,
+            status: 'processed',
+            uploadDate: new Date().toISOString()
+          });
+        } catch (fileError) {
+          console.error(`Failed to process file ${file.name}:`, fileError);
+          alert(`Failed to process ${file.name}. Please check console for details.`);
+        }
       }
 
       setDocuments(newProcessedDocs);
