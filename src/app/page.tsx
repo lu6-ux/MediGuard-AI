@@ -63,6 +63,11 @@ export default function Home() {
         if (file.name.startsWith('.')) continue;
 
         let text = "";
+        let extracted: any = null;
+        let isGeminiProcessed = false;
+        
+        const savedProvider = localStorage.getItem('aiProvider') || 'hybrid';
+        const savedApiKey = localStorage.getItem('geminiApiKey') || '';
         
         // 🚀 DEMO FAST-PATH: If the file name contains "demo", bypass slow OCR for an instant presentation!
         if (file.name.toLowerCase().includes('demo')) {
@@ -86,6 +91,40 @@ Allergies: Penicillin`;
           // Simulate a tiny 800ms loading delay for UI realism
           await new Promise(r => setTimeout(r, 800));
         } 
+        else if (savedProvider === 'gemini' && savedApiKey && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
+          console.log(`⚡ Sending file to Gemini API: ${file.name}`);
+          
+          const base64Image = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+              const b64 = reader.result?.toString().split(',')[1] || '';
+              resolve(b64);
+            };
+            reader.onerror = error => reject(error);
+          });
+          
+          const response = await fetch('/api/extract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base64Image,
+              mimeType: file.type,
+              apiKey: savedApiKey
+            })
+          });
+          
+          if (!response.ok) {
+             const errorData = await response.json();
+             console.error("Gemini API Error:", errorData);
+             throw new Error(errorData.error || 'Gemini API failed');
+          }
+          
+          const result = await response.json();
+          extracted = result.data;
+          isGeminiProcessed = true;
+          text = extracted.doctorNotes || "Extracted perfectly via Gemini Vision";
+        }
         else if (file.type.startsWith('image/')) {
           console.log(`Extracting text from image: ${file.name}`);
           const { data } = await Tesseract.recognize(file, 'eng');
@@ -99,13 +138,23 @@ Allergies: Penicillin`;
         const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
         const newVisitId = `visit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
 
-        const extracted = extractStructuredData(
-          parsed.rawText, 
-          newDocId, 
-          newVisitId, 
-          parsed.visitDate, 
-          parsed.doctorName
-        );
+        if (!isGeminiProcessed) {
+          extracted = extractStructuredData(
+            parsed.rawText, 
+            newDocId, 
+            newVisitId, 
+            parsed.visitDate, 
+            parsed.doctorName
+          );
+        } else {
+          // Sync generated DocIds with Gemini's raw JSON
+          if (extracted.medications) {
+             extracted.medications = extracted.medications.map((m: any) => ({...m, docId: newDocId, visitId: newVisitId}));
+          }
+          if (extracted.labResults) {
+             extracted.labResults = extracted.labResults.map((l: any) => ({...l, docId: newDocId, visitId: newVisitId}));
+          }
+        }
 
         newProcessedDocs.push({
           id: newDocId,

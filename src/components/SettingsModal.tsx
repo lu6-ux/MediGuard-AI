@@ -13,9 +13,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const [apiKey, setApiKey] = useState<string>('');
   const [saved, setSaved] = useState(false);
 
+  React.useEffect(() => {
+    const savedProvider = localStorage.getItem('aiProvider');
+    const savedApiKey = localStorage.getItem('geminiApiKey');
+    if (savedProvider) setProvider(savedProvider);
+    if (savedApiKey) setApiKey(savedApiKey);
+  }, []);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
+    localStorage.setItem('aiProvider', provider);
+    localStorage.setItem('geminiApiKey', apiKey);
     setSaved(true);
     setTimeout(() => {
       setSaved(false);
