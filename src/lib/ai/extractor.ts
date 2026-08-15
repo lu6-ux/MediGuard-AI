@@ -15,14 +15,14 @@ export function extractStructuredData(rawText: string, docId: string, visitId: s
   let gender = "Unknown";
   let chronicConditions: string[] = [];
 
-  const nameMatch = rawText.match(/Patient(?: Name)?:\s*([A-Za-z\.\s]+)/i) || rawText.match(/Name:\s*([A-Za-z\.\s]+)/i);
+  const nameMatch = rawText.match(/Patient(?: Name)?:\s*([A-Za-z\. ]+)/i) || rawText.match(/Name:\s*([A-Za-z\. ]+)/i);
   if (nameMatch) name = nameMatch[1].trim();
 
-  const ageMatch = rawText.match(/Age:\s*(\d+)/i) || rawText.match(/(\d+)\s*(?:Yrs|Years|y\.o\.)/i) || rawText.match(/\((\d+)\/[MF]\)/i);
+  const ageMatch = rawText.match(/Age(?:[/\\]Sex)?:\s*(\d+)/i) || rawText.match(/(\d+)\s*(?:Yrs|Years|y\.o\.)/i) || rawText.match(/\((\d+)\/[MF]\)/i);
   if (ageMatch) age = parseInt(ageMatch[1] || ageMatch[2], 10);
 
-  if (lowerText.match(/\b(female|f)\b/i) || rawText.match(/\(\d+\/F\)/i)) gender = "Female";
-  else if (lowerText.match(/\b(male|m)\b/i) || rawText.match(/\(\d+\/M\)/i)) gender = "Male";
+  if (lowerText.match(/\b(female|f)\b/i) || rawText.match(/\(\d+\/F\)/i) || rawText.match(/Sex:\s*\d+\s*\/\s*F/i) || rawText.match(/Age[/\\]Sex:\s*\d+\s*\/\s*F/i)) gender = "Female";
+  else if (lowerText.match(/\b(male|m)\b/i) || rawText.match(/\(\d+\/M\)/i) || rawText.match(/Sex:\s*\d+\s*\/\s*M/i) || rawText.match(/Age[/\\]Sex:\s*\d+\s*\/\s*M/i)) gender = "Male";
 
   if (lowerText.includes('hypertension')) chronicConditions.push("Hypertension");
   if (lowerText.includes('diabetes')) chronicConditions.push("Diabetes");
