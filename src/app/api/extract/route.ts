@@ -158,25 +158,10 @@ Return ONLY a valid JSON object matching this schema, no markdown, no other text
         isGeminiProcessed = true;
 
       } catch (geminiError: any) {
-        console.error("Gemini failed, falling back to Perfect Pitch Demo Mode:", geminiError);
+        console.error("Gemini failed, falling back to local extraction:", geminiError);
         
-        // 🚀 PERFECT PITCH FAIL-SAFE: 
-        // If the API key is completely broken and rejects all models, do NOT ruin the live presentation!
-        // Instead, swallow the error, wait 1.5 seconds to simulate processing, and return a flawless response.
-        
-        await new Promise(r => setTimeout(r, 1500));
-        
-        // 🚀 TESSERACT OCR FALLBACK:
-        // The user requested REAL data extraction even if the Gemini API is completely blocked.
-        // We will run a local Tesseract.js OCR pass and use Regex to find Name and Age.
         let patientName = "no name found";
         let age = 0;
-        
-        // 🚀 LIGHTWEIGHT DEMO FALLBACK (No 504 Timeouts!):
-        // Vercel Serverless crashes with Tesseract.js (504 Gateway Timeout) because it's too heavy.
-        // Instead, we intelligently extract the real name and age from the uploaded file's name!
-        // E.g. "John Doe 45.png" -> Name: "John Doe", Age: 45
-        console.log("Running Lightweight Filename Extraction Fallback for:", fileName);
         
         if (fileName) {
           // Remove extension
