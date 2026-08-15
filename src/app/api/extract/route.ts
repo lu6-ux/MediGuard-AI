@@ -166,67 +166,43 @@ Return ONLY a valid JSON object matching this schema, no markdown, no other text
         
         await new Promise(r => setTimeout(r, 1500));
         
-        // 🚀 DYNAMIC FAIL-SAFE:
-        // Pick a random patient profile every time an upload fails, so it looks like the AI is extracting different people.
-        const mockProfiles = [
-          {
-            patient: {
-              name: "John Doe",
-              age: 45,
-              gender: "M",
-              knownAllergies: ["Penicillin"],
-              chronicConditions: ["Hypertension", "Type 2 Diabetes"]
-            },
-            medications: [
-              { id: "med-demo-1", name: "Warfarin", dosage: "5mg", frequency: "OD", duration: "Ongoing", startDate: "2026-08-15", prescribedBy: "Dr. Smith", docId: "doc-api", visitId: "visit-api", status: "active" },
-              { id: "med-demo-2", name: "Aspirin", dosage: "75mg", frequency: "OD", startDate: "2026-08-15", prescribedBy: "Dr. Smith", docId: "doc-api", visitId: "visit-api", status: "changed" }
-            ],
-            labResults: [
-              { id: "lab-demo-1", testName: "Fasting Blood Sugar", category: "Metabolic", value: 155, unit: "mg/dL", referenceRange: "70-100", minNormal: 70, maxNormal: 100, isAbnormal: true, testDate: "2026-08-15", docId: "doc-api", visitId: "visit-api" }
-            ],
-            doctorNotes: "Patient presented with elevated blood sugar levels. Adjusted medications. Advised strict diet and exercise.",
-            recommendations: ["Strict diabetic diet", "Daily exercise", "Follow up in 2 weeks"]
-          },
-          {
-            patient: {
-              name: "Emily Chen",
-              age: 32,
-              gender: "F",
-              knownAllergies: ["Sulfa Drugs"],
-              chronicConditions: ["Hypothyroidism", "Asthma"]
-            },
-            medications: [
-              { id: "med-demo-3", name: "Levothyroxine", dosage: "75mcg", frequency: "OD", duration: "Ongoing", startDate: "2026-08-15", prescribedBy: "Dr. Adams", docId: "doc-api", visitId: "visit-api", status: "active" },
-              { id: "med-demo-4", name: "Albuterol Inhaler", dosage: "90mcg", frequency: "PRN", startDate: "2026-08-15", prescribedBy: "Dr. Adams", docId: "doc-api", visitId: "visit-api", status: "active" }
-            ],
-            labResults: [
-              { id: "lab-demo-2", testName: "TSH", category: "Endocrine", value: 4.8, unit: "mIU/L", referenceRange: "0.4-4.0", minNormal: 0.4, maxNormal: 4.0, isAbnormal: true, testDate: "2026-08-15", docId: "doc-api", visitId: "visit-api" }
-            ],
-            doctorNotes: "Slightly elevated TSH. Asthma is well-controlled with PRN albuterol.",
-            recommendations: ["Monitor TSH in 6 months", "Use inhaler as needed for wheezing"]
-          },
-          {
-            patient: {
-              name: "Michael Johnson",
-              age: 60,
-              gender: "M",
-              knownAllergies: ["None"],
-              chronicConditions: ["Osteoarthritis", "Hyperlipidemia"]
-            },
-            medications: [
-              { id: "med-demo-5", name: "Atorvastatin", dosage: "40mg", frequency: "ON", duration: "Ongoing", startDate: "2026-08-15", prescribedBy: "Dr. Lee", docId: "doc-api", visitId: "visit-api", status: "active" },
-              { id: "med-demo-6", name: "Ibuprofen", dosage: "400mg", frequency: "TDS", duration: "10 days", startDate: "2026-08-15", prescribedBy: "Dr. Lee", docId: "doc-api", visitId: "visit-api", status: "changed" }
-            ],
-            labResults: [
-              { id: "lab-demo-3", testName: "LDL Cholesterol", category: "Lipid", value: 140, unit: "mg/dL", referenceRange: "<100", maxNormal: 100, isAbnormal: true, testDate: "2026-08-15", docId: "doc-api", visitId: "visit-api" }
-            ],
-            doctorNotes: "Patient complains of knee pain from osteoarthritis. Started short course of NSAIDs. Lipids remain slightly elevated.",
-            recommendations: ["Physical therapy for knee", "Reduce saturated fats in diet"]
-          }
-        ];
+        // 🚀 TESSERACT OCR FALLBACK:
+        // The user requested REAL data extraction even if the Gemini API is completely blocked.
+        // We will run a local Tesseract.js OCR pass and use Regex to find Name and Age.
+        console.log("Running Tesseract OCR Fallback...");
+        const Tesseract = require('tesseract.js');
         
-        const randomIndex = Math.floor(Math.random() * mockProfiles.length);
-        extracted = mockProfiles[randomIndex];
+        const dataUri = `data:${mimeType};base64,${base64Image}`;
+        const { data: { text } } = await Tesseract.recognize(dataUri, 'eng');
+        console.log("OCR Text Extracted:", text);
+
+        // Regex parsing
+        let patientName = "no name found";
+        let age = 0;
+
+        const nameMatch = text.match(/(?:Name|Patient)[\s:]+([A-Za-z\s]+)(?=\n|Age|Date|Sex|Gender)/i);
+        if (nameMatch && nameMatch[1].trim()) {
+          patientName = nameMatch[1].trim();
+        }
+
+        const ageMatch = text.match(/(?:Age|Yrs|Years)[\s:]*(\d+)/i);
+        if (ageMatch && ageMatch[1]) {
+          age = parseInt(ageMatch[1], 10);
+        }
+
+        extracted = {
+          patient: {
+            name: patientName,
+            age: age,
+            gender: "Unknown",
+            knownAllergies: [],
+            chronicConditions: []
+          },
+          medications: [],
+          labResults: [],
+          doctorNotes: "OCR Fallback used. Medication and Lab Result extraction is limited without advanced AI.",
+          recommendations: []
+        };
         
         isGeminiProcessed = true;
       }
