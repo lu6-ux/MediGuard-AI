@@ -149,18 +149,25 @@ export function analyzePrescriptionSafety(documents: MedicalDocument[]): {
   score -= (infoCount * 5);
   if (score < 0) score = 0;
 
-  let riskLevel: 'Safe' | 'Moderate' | 'High Risk' = 'Safe';
-  if (score < 60 || highRiskCount > 0) {
+  let riskLevel: 'Safe' | 'Moderate' | 'High Risk' | 'No Data' = 'Safe';
+  let summary = '';
+
+  if (documents.length === 0) {
+    score = 0;
+    riskLevel = 'No Data';
+    summary = 'PENDING: Please upload medical records or prescriptions to begin the AI safety analysis.';
+  } else if (allMedications.length === 0) {
+    riskLevel = 'Safe';
+    summary = 'NO MEDICATIONS DETECTED: We analyzed the uploaded documents but found no medications to check for interactions.';
+  } else if (score < 60 || highRiskCount > 0) {
     riskLevel = 'High Risk';
+    summary = `CRITICAL RISK FLAGS DETECTED: Found ${highRiskCount} high-risk prescription flags. Immediate doctor consultation recommended.`;
   } else if (score < 85 || warningCount > 0) {
     riskLevel = 'Moderate';
+    summary = `MODERATE CONCERNS: Found ${warningCount} medication warnings. Review with your pharmacist.`;
+  } else {
+    summary = `SAFE PROFILE: No critical medication interactions or allergy conflicts detected across the ${allMedications.length} medications analyzed.`;
   }
-
-  const summary = highRiskCount > 0
-    ? `CRITICAL RISK FLAGS DETECTED: Found ${highRiskCount} high-risk prescription flags (including allergy contradiction & severe drug interaction). Immediate doctor consultation recommended.`
-    : warningCount > 0
-    ? `MODERATE CONCERNS: Found ${warningCount} medication warnings (duplicate prescribing or dosage adjustments). Review with your pharmacist.`
-    : `SAFE PROFILE: No critical medication interactions or allergy conflicts detected across uploaded documents.`;
 
   return {
     alerts,
@@ -171,7 +178,9 @@ export function analyzePrescriptionSafety(documents: MedicalDocument[]): {
       highRiskCount,
       warningCount,
       infoCount,
-      summary
+      summary,
+      totalMedicationsAnalyzed: allMedications.length,
+      totalDocumentsAnalyzed: documents.length
     }
   };
 }

@@ -122,12 +122,14 @@ export interface LabTrend {
 
 export interface MedicalRiskScore {
   score: number; // 0 (critical risk) to 100 (perfect safety)
-  riskLevel: 'Safe' | 'Moderate' | 'High Risk';
+  riskLevel: 'Safe' | 'Moderate' | 'High Risk' | 'No Data';
   totalAlerts: number;
   highRiskCount: number;
   warningCount: number;
   infoCount: number;
   summary: string;
+  totalMedicationsAnalyzed?: number;
+  totalDocumentsAnalyzed?: number;
 }
 
 export interface EvidenceCitation {

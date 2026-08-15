@@ -82,11 +82,11 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
               <span className="text-xs uppercase tracking-wider font-bold text-slate-400">
                 {t.safetyOverallScore}
               </span>
-              <h3 className={`text-xl font-black mt-0.5 ${riskScore.score < 60 ? 'text-rose-400' : riskScore.score < 85 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {riskScore.riskLevel}
+              <h3 className={`text-xl font-black mt-0.5 ${riskScore.riskLevel === 'No Data' ? 'text-slate-400' : riskScore.score < 60 ? 'text-rose-400' : riskScore.score < 85 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                {riskScore.riskLevel === 'No Data' ? '--' : riskScore.riskLevel}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                {t.safetyEvaluatedFrom} {alerts.length} {t.safetyTotalChecks}
+                {t.safetyEvaluatedFrom} {riskScore.totalMedicationsAnalyzed || 0} {t.safetyTotalChecks}
               </p>
             </div>
           </div>
@@ -108,7 +108,7 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
                 <span className="text-[10px] text-slate-400 font-semibold uppercase">{t.warningAlerts}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                <span className="block text-lg font-black text-emerald-400">{alerts.length}</span>
+                <span className="block text-lg font-black text-emerald-400">{riskScore.totalMedicationsAnalyzed || 0}</span>
                 <span className="text-[10px] text-slate-400 font-semibold uppercase">{t.safetyTotalAnalyzed}</span>
               </div>
             </div>
