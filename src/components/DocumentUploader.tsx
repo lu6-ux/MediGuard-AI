@@ -45,31 +45,31 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       
       {/* Patient Banner Card */}
       {patient && (
-        <div className="glass-panel rounded-2xl p-5 border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-emerald-950/20">
+        <div className="glass-panel rounded-2xl p-5 border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-white via-slate-50 to-emerald-50 dark:from-slate-900 dark:via-slate-900/90 dark:to-emerald-950/20">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-                <User className="h-6 w-6 text-emerald-400" />
+              <div className="h-12 w-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
+                <User className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
                 <div className="flex items-center space-x-3">
-                  <h2 className="text-lg font-bold text-white">{patient.name}</h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">{patient.name}</h2>
+                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
                     {patient.age} Yrs • {patient.gender}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-400">
-                  <span>Conditions: <strong className="text-slate-200">{patient.chronicConditions.join(', ')}</strong></span>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                  <span>Conditions: <strong className="text-slate-700 dark:text-slate-200">{patient.chronicConditions.join(', ')}</strong></span>
                 </div>
               </div>
             </div>
 
             {/* Documented Allergies Highlight */}
-            <div className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center space-x-2">
-              <AlertTriangle className="h-4 w-4 text-rose-400 shrink-0" />
-              <div className="text-xs">
-                <span className="text-rose-300 font-semibold">{t.knownAllergies}: </span>
-                <span className="text-rose-200 font-bold">{patient.knownAllergies.join(', ')}</span>
+            <div className="px-4 py-3 min-h-[44px] rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0" />
+              <div className="text-sm">
+                <span className="text-rose-700 dark:text-rose-300 font-semibold">{t.knownAllergies}: </span>
+                <span className="text-rose-600 dark:text-rose-200 font-bold">{patient.knownAllergies.join(', ')}</span>
               </div>
             </div>
           </div>
@@ -86,8 +86,8 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all flex flex-col items-center justify-center min-h-[160px] ${
             isDragOver 
-              ? 'border-emerald-400 bg-emerald-500/10' 
-              : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
+              ? 'border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-500/10' 
+              : 'border-slate-300 bg-slate-50/60 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700'
           }`}
         >
           <input 

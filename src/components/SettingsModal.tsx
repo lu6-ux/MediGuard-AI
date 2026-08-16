@@ -33,61 +33,61 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="glass-panel w-full max-w-md rounded-3xl border border-slate-800 p-6 bg-slate-900 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-md">
+      <div className="glass-panel w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-2xl relative">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"
+          className="absolute top-5 right-5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-2 rounded-lg hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 transition"
         >
           <X className="h-5 w-5" />
         </button>
 
         <div className="flex items-center space-x-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
             <Cpu className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">AI Engine & Model Settings</h3>
-            <p className="text-xs text-slate-400">Configure LLM providers and custom API keys</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">AI Engine & Model Settings</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Configure LLM providers and custom API keys</p>
           </div>
         </div>
 
-        <div className="space-y-4 text-xs">
+        <div className="space-y-5 text-sm">
           
           {/* Provider Selector */}
           <div>
-            <label className="block text-slate-300 font-semibold mb-1.5">Select AI Provider:</label>
-            <div className="grid grid-cols-2 gap-2">
+            <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-2">Select AI Provider:</label>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setProvider('hybrid')}
-                className={`p-3 rounded-xl border text-left font-semibold transition ${
+                className={`p-4 rounded-xl border text-left font-semibold transition ${
                   provider === 'hybrid'
-                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
-                    : 'border-slate-800 bg-slate-950 text-slate-400'
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <span>Smart Hybrid Engine</span>
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <ShieldCheck className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                 </div>
-                <span className="text-[10px] text-slate-400 font-normal">Offline NLP & Deterministic (Default)</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">Offline NLP & Deterministic (Default)</span>
               </button>
 
               <button
                 onClick={() => setProvider('gemini')}
-                className={`p-3 rounded-xl border text-left font-semibold transition ${
+                className={`p-4 rounded-xl border text-left font-semibold transition ${
                   provider === 'gemini'
-                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
-                    : 'border-slate-800 bg-slate-950 text-slate-400'
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <span>Google Gemini 1.5</span>
-                  <Key className="h-3.5 w-3.5 text-teal-400" />
+                  <Key className="h-4 w-4 text-teal-500 dark:text-teal-400" />
                 </div>
-                <span className="text-[10px] text-slate-400 font-normal">Gemini Flash / Pro API</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">Gemini Flash / Pro API</span>
               </button>
             </div>
           </div>
@@ -95,7 +95,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
           {/* API Key Input */}
           {provider !== 'hybrid' && (
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">
+              <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1.5">
                 Enter {provider.toUpperCase()} API Key:
               </label>
               <input
@@ -103,19 +103,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="sk-..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
             </div>
           )}
 
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
             Note: MediGuard AI runs full deterministic NLP & safety calculations out-of-the-box in Hybrid mode without needing external API keys.
           </div>
 
           {/* Save Button */}
           <button
             onClick={handleSave}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950"
+            className="w-full py-3 min-h-[48px] rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white dark:text-slate-950 font-bold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950 transition-all"
           >
             {saved ? (
               <>

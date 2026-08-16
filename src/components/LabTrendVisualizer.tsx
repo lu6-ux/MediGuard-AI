@@ -28,27 +28,27 @@ export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrend
     <div className="space-y-6">
       
       {/* Header & Metric Selector Tabs */}
-      <div className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      <div className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center space-x-2">
-            <Activity className="h-5 w-5 text-emerald-400" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+            <Activity className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             <span>Longitudinal Laboratory Result Trends</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Track test values drifting over time across multiple medical visits
           </p>
         </div>
 
         {/* Metric Selector Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+        <div className="flex flex-wrap items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto">
           {labTrends.map((trend) => (
             <button
               key={trend.metricName}
               onClick={() => setSelectedMetric(trend.metricName)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition flex-1 sm:flex-none ${
                 selectedMetric === trend.metricName
-                  ? 'bg-emerald-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-emerald-500 text-white dark:text-slate-950 shadow-md'
+                  : 'text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
               }`}
             >
               {trend.metricName}
@@ -61,22 +61,22 @@ export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrend
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Interactive Chart Container */}
-        <div className="lg:col-span-2 glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/80">
-          <div className="flex items-center justify-between mb-4">
+        <div className="lg:col-span-2 glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <span>{currentTrend.metricName}</span>
-                <span className="text-xs font-normal text-slate-400">({currentTrend.unit})</span>
+                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">({currentTrend.unit})</span>
               </h3>
-              <span className="text-xs text-slate-400">Normal Range: {currentTrend.referenceRange}</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Normal Range: {currentTrend.referenceRange}</span>
             </div>
 
-            <span className={`px-2.5 py-1 rounded-md text-xs font-bold capitalize flex items-center space-x-1 ${
+            <span className={`px-3 py-1.5 rounded-md text-sm font-bold capitalize flex items-center space-x-1 ${
               currentTrend.trendDirection === 'increasing' 
-                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
-                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' 
+                : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
             }`}>
-              <TrendingUp className="h-3.5 w-3.5" />
+              <TrendingUp className="h-4 w-4" />
               <span>{currentTrend.trendDirection} Trend</span>
             </span>
           </div>
@@ -106,25 +106,25 @@ export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrend
         </div>
 
         {/* AI Trend Explanation Callout Box */}
-        <div className="glass-panel p-5 rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 flex flex-col justify-between">
+        <div className="glass-panel p-5 rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-gradient-to-b from-white via-slate-50 to-emerald-50 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between text-emerald-400 mb-3">
-              <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-emerald-600 dark:text-emerald-400 mb-4">
+              <div className="flex items-center space-x-1.5 text-sm font-bold uppercase tracking-wider">
                 <Sparkles className="h-4 w-4" />
                 <span>AI Clinical Interpretation</span>
               </div>
-              <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[10px] font-bold border border-emerald-500/20">
+              <span className="px-2.5 py-1 rounded bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-500/20">
                 {currentTrend.confidenceScore}% Confidence
               </span>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed space-y-2 mb-4">
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed space-y-2 mb-4">
               {currentTrend.explanation}
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 flex items-start space-x-2">
-            <Info className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-400 flex items-start space-x-2">
+            <Info className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
             <span>Values drifting continuously out of range should be evaluated by a healthcare professional for treatment adjustment.</span>
           </div>
         </div>

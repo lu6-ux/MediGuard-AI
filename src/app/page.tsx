@@ -231,7 +231,7 @@ Allergies: Penicillin`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white dark:selection:text-slate-950 transition-colors duration-200">
       
       {/* Top Navbar */}
       <Navbar
@@ -246,14 +246,14 @@ Allergies: Penicillin`;
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Navigation Tabs Bar */}
-        <div className="glass-panel p-1.5 rounded-2xl border border-slate-800 flex flex-wrap items-center gap-1 bg-slate-900/90 overflow-x-auto">
+        <div className="glass-panel p-2 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-nowrap md:flex-wrap items-center gap-2 bg-white/90 dark:bg-slate-900/90 overflow-x-auto scrollbar-hide snap-x">
           
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 ${
+            className={`px-5 py-3 min-h-[44px] rounded-xl text-sm font-bold transition flex items-center space-x-2 shrink-0 snap-start ${
               activeTab === 'overview'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-950'
-                : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800'
             }`}
           >
             <LayoutDashboard className="h-4 w-4" />
@@ -262,10 +262,10 @@ Allergies: Penicillin`;
 
           <button
             onClick={() => setActiveTab('timeline')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 ${
+            className={`px-5 py-3 min-h-[44px] rounded-xl text-sm font-bold transition flex items-center space-x-2 shrink-0 snap-start ${
               activeTab === 'timeline'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-950'
-                : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800'
             }`}
           >
             <Calendar className="h-4 w-4" />
@@ -274,10 +274,10 @@ Allergies: Penicillin`;
 
           <button
             onClick={() => setActiveTab('safety')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 relative ${
+            className={`px-5 py-3 min-h-[44px] rounded-xl text-sm font-bold transition flex items-center space-x-2 shrink-0 snap-start relative ${
               activeTab === 'safety'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-950'
-                : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800'
             }`}
           >
             <ShieldAlert className="h-4 w-4" />
@@ -289,10 +289,10 @@ Allergies: Penicillin`;
 
           <button
             onClick={() => setActiveTab('lab_trends')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 ${
+            className={`px-5 py-3 min-h-[44px] rounded-xl text-sm font-bold transition flex items-center space-x-2 shrink-0 snap-start ${
               activeTab === 'lab_trends'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-950'
-                : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800'
             }`}
           >
             <Activity className="h-4 w-4" />
@@ -301,10 +301,10 @@ Allergies: Penicillin`;
 
           <button
             onClick={() => setActiveTab('chat')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 ${
+            className={`px-5 py-3 min-h-[44px] rounded-xl text-sm font-bold transition flex items-center space-x-2 shrink-0 snap-start ${
               activeTab === 'chat'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-950'
-                : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800'
             }`}
           >
             <Bot className="h-4 w-4" />
@@ -313,10 +313,10 @@ Allergies: Penicillin`;
 
           <button
             onClick={() => setActiveTab('summary')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shrink-0 ${
+            className={`px-5 py-3 min-h-[44px] rounded-xl text-sm font-bold transition flex items-center space-x-2 shrink-0 snap-start ml-auto ${
               activeTab === 'summary'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-lg shadow-emerald-950'
-                : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/20 dark:shadow-indigo-950'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800'
             }`}
           >
             <Printer className="h-4 w-4" />
@@ -382,8 +382,7 @@ Allergies: Penicillin`;
 
       </main>
 
-      {/* Mandatory Medical Disclaimer Sticky Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/90 py-4 text-slate-400 text-xs mt-auto">
+      <footer className="border-t border-slate-200 dark:border-slate-900 bg-white/90 dark:bg-slate-950/90 py-4 text-slate-500 dark:text-slate-400 text-xs mt-auto sticky bottom-0 z-10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-1">
           <p className="flex items-center justify-center space-x-1 text-slate-300 font-semibold">
             <Info className="h-4 w-4 text-amber-400" />
