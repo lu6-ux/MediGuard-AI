@@ -26,6 +26,20 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
   const [inputText, setInputText] = useState("");
   const [isThinking, setIsThinking] = useState(false);
 
+  // Reset chat and update welcome message when language changes
+  React.useEffect(() => {
+    setMessages([
+      {
+        id: "msg-welcome",
+        sender: "ai",
+        text: t.chatWelcome,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        confidenceScore: 99,
+        disclaimer: t.disclaimerText
+      }
+    ]);
+  }, [currentLang, t.chatWelcome, t.disclaimerText]);
+
   const sampleQuestions = [
     t.chatQ1,
     t.chatQ2,
