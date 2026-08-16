@@ -110,22 +110,22 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
             className="hidden" 
           />
 
-          <div className="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2">
+          <div className="h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
             <Upload className="h-5 w-5" />
           </div>
-          <h3 className="text-sm font-semibold text-white mb-1">{t.uploadTitle}</h3>
-          <p className="text-xs text-slate-400 max-w-md mb-3">{t.uploadSubtitle}</p>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{t.uploadTitle}</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mb-3">{t.uploadSubtitle}</p>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition"
+              className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition"
             >
               📄 Upload Files
             </button>
             <button
               onClick={() => folderInputRef.current?.click()}
-              className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-400 border border-emerald-500/30 transition flex items-center space-x-1"
+              className="px-4 py-2 rounded-lg bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-xs font-semibold text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 transition flex items-center space-x-1"
             >
               📁 Select Entire Folder
             </button>
@@ -137,9 +137,9 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       {/* Uploaded Document List */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <span>Uploaded Medical Documents</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
               {documents.length}
             </span>
           </h3>
