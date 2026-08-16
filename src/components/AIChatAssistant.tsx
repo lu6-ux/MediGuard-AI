@@ -13,32 +13,9 @@ interface AIChatAssistantProps {
 
 export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, currentLang }) => {
   const t = TRANSLATIONS[currentLang];
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "msg-welcome",
-      sender: "ai",
-      text: t.chatWelcome,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      confidenceScore: 99,
-      disclaimer: t.disclaimerText
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [isThinking, setIsThinking] = useState(false);
-
-  // Reset chat and update welcome message when language changes
-  React.useEffect(() => {
-    setMessages([
-      {
-        id: "msg-welcome",
-        sender: "ai",
-        text: t.chatWelcome,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        confidenceScore: 99,
-        disclaimer: t.disclaimerText
-      }
-    ]);
-  }, [currentLang, t.chatWelcome, t.disclaimerText]);
 
   const sampleQuestions = [
     t.chatQ1,
@@ -123,6 +100,29 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
 
       {/* Chat Messages Container */}
       <div className="glass-panel rounded-2xl border border-slate-800 p-4 min-h-[400px] max-h-[550px] overflow-y-auto space-y-4 bg-slate-950/60">
+        
+        {/* Dynamic Static Welcome Message */}
+        <div className="flex flex-col items-start">
+          <div className="max-w-[85%] rounded-2xl p-4 border text-xs leading-relaxed bg-slate-900 text-slate-200 border-slate-800 rounded-bl-none shadow-md">
+            <div className="flex items-center justify-between mb-1.5 border-b border-slate-800/60 pb-1 text-[11px]">
+              <span className="font-bold flex items-center space-x-1">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-emerald-400">MediGuard AI</span>
+              </span>
+              <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold text-[10px]">
+                99% {t.confidence}
+              </span>
+            </div>
+            <div className="whitespace-pre-line text-xs font-normal">
+              {t.chatWelcome}
+            </div>
+            <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300 flex items-start space-x-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+              <span>{t.disclaimerText}</span>
+            </div>
+          </div>
+        </div>
+
         {messages.map((msg) => (
           <div
             key={msg.id}
