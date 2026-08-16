@@ -22,7 +22,10 @@ export function answerMedicalQuestion(question: string, documents: MedicalDocume
   const sortedDocs = [...documents].sort((a, b) => new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime());
 
   // 1. ALLERGY & RECENT PRESCRIPTION QUESTION
-  if (qLower.includes('allergy') || qLower.includes('prescribed despite') || qLower.includes('allergic')) {
+  if (
+    qLower.includes('allergy') || qLower.includes('prescribed despite') || qLower.includes('allergic') || 
+    qLower.includes('ஒவ்வாமை') || qLower.includes('ආසාත්මිකතා')
+  ) {
     const docWithAllergy = sortedDocs.find(d => d.extractedData?.patient?.knownAllergies?.some(a => a.toLowerCase().includes('penicillin')));
     const docWithAmoxicillin = sortedDocs.find(d => d.extractedData?.medications?.some(m => m.name.toLowerCase().includes('amoxicillin')));
 
@@ -59,7 +62,10 @@ export function answerMedicalQuestion(question: string, documents: MedicalDocume
   }
 
   // 2. WHAT CHANGED / VISITS COMPARISON
-  if (qLower.includes('changed') || qLower.includes('first and latest') || qLower.includes('difference')) {
+  if (
+    qLower.includes('changed') || qLower.includes('first and latest') || qLower.includes('difference') ||
+    qLower.includes('மாறியுள்ளது') || qLower.includes('வேறுபாடு') || qLower.includes('වෙනස්')
+  ) {
     const firstDoc = sortedDocs[0];
     const lastDoc = sortedDocs[sortedDocs.length - 1];
 
@@ -78,7 +84,10 @@ export function answerMedicalQuestion(question: string, documents: MedicalDocume
   }
 
   // 3. WORSE TEST RESULTS / LAB DRIFT
-  if (qLower.includes('worse') || qLower.includes('test results') || qLower.includes('lab') || qLower.includes('drifting')) {
+  if (
+    qLower.includes('worse') || qLower.includes('test results') || qLower.includes('lab') || qLower.includes('drifting') ||
+    qLower.includes('மோசமாகி') || qLower.includes('முடிவுகள்') || qLower.includes('නරක') || qLower.includes('ප්‍රතිඵල')
+  ) {
     sortedDocs.forEach(d => {
       if (d.extractedData?.labResults) {
         const abnormalLabs = d.extractedData.labResults.filter(l => l.isAbnormal);
@@ -96,7 +105,10 @@ export function answerMedicalQuestion(question: string, documents: MedicalDocume
   }
 
   // 4. CURRENT MEDICATIONS LIST
-  if (qLower.includes('list') || qLower.includes('medicines') || qLower.includes('taking') || qLower.includes('current')) {
+  if (
+    qLower.includes('list') || qLower.includes('medicines') || qLower.includes('taking') || qLower.includes('current') ||
+    qLower.includes('பட்டியலிடுங்கள்') || qLower.includes('மருந்துகள்') || qLower.includes('ලැයිස්තුගත') || qLower.includes('ඖෂධ')
+  ) {
     const activeMeds: Array<{ name: string; dosage: string; freq: string; docName: string; date: string }> = [];
     
     sortedDocs.forEach(d => {
