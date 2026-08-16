@@ -144,9 +144,9 @@ Allergies: Penicillin`;
                  const { data } = await Tesseract.recognize(file, 'eng');
                  const confidence = data.confidence;
                  
-                 if (confidence < 70) {
+                 if (confidence < 30) {
                     throw new Error(`OCR Confidence too low (${Math.round(confidence)}%). Image rejected for medical safety.`);
-                 } else if (confidence < 85) {
+                 } else if (confidence < 70) {
                     const proceed = window.confirm(`WARNING: Low OCR Confidence (${Math.round(confidence)}%).\n\nThe AI might misread drug dosages (e.g. 500mg as 50mg).\nDo you want to proceed and manually verify the results?`);
                     if (!proceed) throw new Error("Upload cancelled by user due to low OCR confidence.");
                  }
@@ -168,9 +168,9 @@ Allergies: Penicillin`;
             const { data } = await Tesseract.recognize(file, 'eng');
             const confidence = data.confidence;
              
-            if (confidence < 70) {
+            if (confidence < 30) {
                throw new Error(`OCR Confidence too low (${Math.round(confidence)}%). Image rejected for medical safety.`);
-            } else if (confidence < 85) {
+            } else if (confidence < 70) {
                const proceed = window.confirm(`WARNING: Low OCR Confidence (${Math.round(confidence)}%).\n\nThe AI might misread drug dosages (e.g. 500mg as 50mg).\nDo you want to proceed and manually verify the results?`);
                if (!proceed) throw new Error("Upload cancelled by user due to low OCR confidence.");
             }
