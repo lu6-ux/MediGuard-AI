@@ -101,7 +101,7 @@ Allergies: Penicillin`;
           } 
           else if (savedProvider === 'gemini') {
             if (!savedApiKey) {
-              alert(`Cannot process ${file.name} with Gemini: API Key is missing. Please check Settings.`);
+              alert(t.uploadErrNoApiKey.replace('{file}', file.name));
               continue; // Skip this file
             }
             
@@ -145,9 +145,9 @@ Allergies: Penicillin`;
                  const confidence = data.confidence;
                  
                  if (confidence < 30) {
-                    throw new Error(`OCR Confidence too low (${Math.round(confidence)}%). Image rejected for medical safety.`);
+                    throw new Error(t.uploadErrLowConfidence.replace('{confidence}', Math.round(confidence).toString()));
                  } else if (confidence < 70) {
-                    const proceed = window.confirm(`WARNING: Low OCR Confidence (${Math.round(confidence)}%).\n\nThe AI might misread drug dosages (e.g. 500mg as 50mg).\nDo you want to proceed and manually verify the results?`);
+                    const proceed = window.confirm(t.uploadWarnLowConfidence.replace('{confidence}', Math.round(confidence).toString()));
                     if (!proceed) throw new Error("Upload cancelled by user due to low OCR confidence.");
                  }
                  
@@ -169,9 +169,9 @@ Allergies: Penicillin`;
             const confidence = data.confidence;
              
             if (confidence < 30) {
-               throw new Error(`OCR Confidence too low (${Math.round(confidence)}%). Image rejected for medical safety.`);
+               throw new Error(t.uploadErrLowConfidence.replace('{confidence}', Math.round(confidence).toString()));
             } else if (confidence < 70) {
-               const proceed = window.confirm(`WARNING: Low OCR Confidence (${Math.round(confidence)}%).\n\nThe AI might misread drug dosages (e.g. 500mg as 50mg).\nDo you want to proceed and manually verify the results?`);
+               const proceed = window.confirm(t.uploadWarnLowConfidence.replace('{confidence}', Math.round(confidence).toString()));
                if (!proceed) throw new Error("Upload cancelled by user due to low OCR confidence.");
             }
             
@@ -218,7 +218,7 @@ Allergies: Penicillin`;
           });
         } catch (fileError) {
           console.error(`Failed to process file ${file.name}:`, fileError);
-          alert(`Failed to process ${file.name}. Please check console for details.`);
+          alert(t.uploadErrGeneral.replace('{file}', file.name));
         }
       }
 
