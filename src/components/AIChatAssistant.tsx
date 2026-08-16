@@ -24,7 +24,27 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
     t.chatQ4
   ];
 
-  const handleSend = (textToSend?: string) => {
+  // Dynamically retranslate the entire chat history when the language changes
+  React.useEffect(() => {
+    setMessages(prev => prev.map(msg => {
+      if (msg.sender === 'user' && msg.suggestedIndex !== undefined) {
+        // Retranslate suggested user questions
+        return { ...msg, text: sampleQuestions[msg.suggestedIndex] };
+      }
+      if (msg.sender === 'ai' && msg.originalQuery) {
+        // Re-run the RAG engine for the AI's previous answer using the new language
+        const ragResult = answerMedicalQuestion(msg.originalQuery, documents, currentLang);
+        return { 
+          ...msg, 
+          text: ragResult.answer,
+          disclaimer: ragResult.disclaimer 
+        };
+      }
+      return msg; // Leave custom-typed user questions as-is
+    }));
+  }, [currentLang, documents]);
+
+  const handleSend = (textToSend?: string, suggestedIndex?: number) => {
     const query = textToSend || inputText;
     if (!query.trim()) return;
 
@@ -32,7 +52,8 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
       id: `user-${Date.now()}`,
       sender: "user",
       text: query,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      suggestedIndex: suggestedIndex
     };
 
     setMessages(prev => [...prev, userMsg]);
@@ -49,7 +70,8 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         confidenceScore: ragResult.confidenceScore,
         citations: ragResult.citations,
-        disclaimer: ragResult.disclaimer
+        disclaimer: ragResult.disclaimer,
+        originalQuery: query
       };
 
       setMessages(prev => [...prev, aiMsg]);
@@ -89,7 +111,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
           {sampleQuestions.map((q, idx) => (
             <button
               key={idx}
-              onClick={() => handleSend(q)}
+              onClick={() => handleSend(q, idx)}
               className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 hover:bg-slate-850 transition text-left"
             >
               💬 {q}

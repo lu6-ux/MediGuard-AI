@@ -147,4 +147,6 @@ export interface ChatMessage {
   confidenceScore?: number;
   citations?: EvidenceCitation[];
   disclaimer?: string;
+  originalQuery?: string;
+  suggestedIndex?: number;
 }
