@@ -111,9 +111,9 @@ Important Rules:
     // Remove data:image/... prefix if present
     const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
 
-    let geminiModel = (process.env.GEMINI_MODEL || "gemini-1.5-flash").trim().replace(/['"]/g, '');
+    let geminiModel = (process.env.GEMINI_MODEL || "gemini-2.5-flash").trim().replace(/['"]/g, '');
     if (geminiModel.includes('1.0-pro-vision')) {
-        geminiModel = "gemini-1.5-flash";
+        geminiModel = "gemini-2.5-flash";
     }
     console.log(`[EXTRACT] Selected Gemini Model: ${geminiModel}`);
 
@@ -142,12 +142,8 @@ Important Rules:
       console.error(`[EXTRACT] Gemini SDK error for ${geminiModel}`);
       console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
       
-      // Classify error type
-      if (err?.message?.includes("is not found") || err?.message?.includes("404")) {
-        return NextResponse.json({ error: `GEMINI_MODEL_NOT_FOUND: The model ${geminiModel} is not available or valid.` }, { status: 404 });
-      }
-      
-      return NextResponse.json({ error: `UNKNOWN_EXTRACTION_ERROR: ${err?.message || 'Gemini SDK execution failed.'}` }, { status: 500 });
+      // Return the actual raw error message so we can debug it!
+      return NextResponse.json({ error: `SDK_ERROR: ${err?.message || 'Unknown error'}` }, { status: 500 });
     }
 
     if (!resultText) {
