@@ -66,23 +66,26 @@ Do NOT output markdown \`\`\`json blocks. Return ONLY raw JSON.
 `;
 
     let responseText = null;
-    let fallbackModels = [geminiModel, 'gemini-3.6-pro', 'gemini-2.0-flash'];
     let lastError: any = null;
+    const maxRetries = 3;
 
-    for (const currentModel of fallbackModels) {
+    for (let i = 0; i < maxRetries; i++) {
       try {
-        const model = genAI.getGenerativeModel({ model: currentModel });
+        const model = genAI.getGenerativeModel({ model: geminiModel });
         const result = await model.generateContent(prompt);
         responseText = result.response.text();
         break; // Success!
       } catch (err: any) {
-        console.error(`[CHAT] Gemini SDK error for ${currentModel}`, err);
+        console.error(`[CHAT] Gemini SDK error for ${geminiModel} (Attempt ${i + 1})`, err);
         lastError = err;
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 2s delay
+        }
       }
     }
 
     if (!responseText) {
-      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All fallback models failed'}` }, { status: 500 });
+      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All retries failed'}` }, { status: 500 });
     }
     
     let jsonString = responseText.trim();

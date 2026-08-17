@@ -118,15 +118,15 @@ Important Rules:
     console.log(`[EXTRACT] Selected Gemini Model: ${geminiModel}`);
 
     let resultText = null;
-    let fallbackModels = [geminiModel, "gemini-3.6-pro", "gemini-2.0-flash"];
     let lastError: any = null;
+    const maxRetries = 3;
     
-    for (const currentModel of fallbackModels) {
+    for (let i = 0; i < maxRetries; i++) {
       try {
         const genAI = new GoogleGenerativeAI(finalApiKey);
-        const model = genAI.getGenerativeModel({ model: currentModel });
+        const model = genAI.getGenerativeModel({ model: geminiModel });
 
-        console.log(`[EXTRACT] Sending request via GoogleGenerativeAI SDK to ${currentModel}`);
+        console.log(`[EXTRACT] Sending request via GoogleGenerativeAI SDK to ${geminiModel} (Attempt ${i + 1})`);
         const result = await model.generateContent([
           prompt,
           {
@@ -139,19 +139,22 @@ Important Rules:
         
         const response = await result.response;
         resultText = response.text();
-        console.log(`[EXTRACT] Model ${currentModel} succeeded`);
+        console.log(`[EXTRACT] Model ${geminiModel} succeeded`);
         break; // Success!
         
       } catch (err: any) {
-        console.error(`[EXTRACT] Gemini SDK error for ${currentModel}`);
+        console.error(`[EXTRACT] Gemini SDK error for ${geminiModel}`);
         console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
         lastError = err;
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 2s delay
+        }
       }
     }
 
     if (!resultText) {
-      console.error("[EXTRACT] All fallback models failed.");
-      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All fallback models failed'}` }, { status: 500 });
+      console.error("[EXTRACT] All retries failed.");
+      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All retries failed'}` }, { status: 500 });
     }
 
     if (!resultText) {
