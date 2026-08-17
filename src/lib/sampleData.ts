@@ -5,7 +5,8 @@ export const YGC_SAMPLE_PATIENT = {
   age: 58,
   gender: "Male",
   knownAllergies: ["Penicillin", "Beta-lactam antibiotics"],
-  chronicConditions: ["Hypertension", "Prediabetes / Type 2 Diabetes", "Atrial Fibrillation"]
+  chronicConditions: ["Hypertension", "Prediabetes / Type 2 Diabetes", "Atrial Fibrillation"],
+  confidence: "HIGH" as const
 };
 
 export const YGC_SAMPLE_DOCUMENTS: MedicalDocument[] = [

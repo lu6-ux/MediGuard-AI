@@ -25,7 +25,7 @@ export interface Medication {
   sourceDocument?: string;
   status: 'active' | 'changed' | 'discontinued';
   notes?: string;
-  confidence: ConfidenceLevel;
+  confidence?: ConfidenceLevel;
 }
 
 export interface LabResult {
@@ -42,7 +42,7 @@ export interface LabResult {
   docId: string;
   visitId: string;
   sourceDocument?: string;
-  confidence: ConfidenceLevel;
+  confidence?: ConfidenceLevel;
 }
 
 export interface ClinicalFinding {
@@ -54,7 +54,7 @@ export interface ClinicalFinding {
   docId: string;
   visitId: string;
   sourceDocument?: string;
-  confidence: ConfidenceLevel;
+  confidence?: ConfidenceLevel;
 }
 
 export interface PatientInfo {
@@ -63,15 +63,15 @@ export interface PatientInfo {
   gender: string;
   knownAllergies: string[];
   chronicConditions: string[];
-  confidence: ConfidenceLevel;
+  confidence?: ConfidenceLevel;
 }
 
 export interface ExtractedData {
   patient: PatientInfo;
-  medications: Medication[];
-  labResults: LabResult[];
-  clinicalFindings: ClinicalFinding[];
-  doctorNotes: string;
+  medications?: Medication[];
+  labResults?: LabResult[];
+  clinicalFindings?: ClinicalFinding[];
+  doctorNotes?: string;
   recommendations?: string[];
 }
 

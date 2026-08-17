@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Tesseract from 'tesseract.js';
 import { 
   FileText, 
@@ -285,7 +285,7 @@ Allergies: Penicillin`;
         onLanguageChange={setCurrentLang}
         onOpenSettings={() => setIsSettingsOpen(true)}
         documentCount={documents.length}
-        safetyScore={safetyData.riskScore.score}
+        safetyScore={safetyData?.riskScore?.score ?? 0}
       />
 
       {/* Main App Container */}
@@ -328,7 +328,7 @@ Allergies: Penicillin`;
           >
             <ShieldAlert className="h-4 w-4" />
             <span>{t.navSafety}</span>
-            {safetyData.riskScore.highRiskCount > 0 && (
+            {(safetyData?.riskScore?.highRiskCount ?? 0) > 0 && (
               <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping absolute top-2 right-2" />
             )}
           </button>
@@ -382,8 +382,8 @@ Allergies: Penicillin`;
             />
 
             <SafetyDashboard
-              alerts={safetyData.alerts}
-              riskScore={safetyData.riskScore}
+              alerts={safetyData?.alerts || []}
+              riskScore={safetyData?.riskScore || { score: 0, highRiskCount: 0, mediumRiskCount: 0 }}
               currentLang={currentLang}
               latestClinicalFindings={documents[documents.length - 1]?.extractedData?.clinicalFindings?.map(f => f.description).join(', ')}
             />
@@ -400,8 +400,8 @@ Allergies: Penicillin`;
 
         {activeTab === 'safety' && (
           <SafetyDashboard
-            alerts={safetyData.alerts}
-            riskScore={safetyData.riskScore}
+            alerts={safetyData?.alerts || []}
+            riskScore={safetyData?.riskScore || { score: 0, highRiskCount: 0, mediumRiskCount: 0 }}
             currentLang={currentLang}
             latestClinicalFindings={documents[documents.length - 1]?.extractedData?.clinicalFindings?.map(f => f.description).join(', ')}
           />
@@ -421,8 +421,8 @@ Allergies: Penicillin`;
         {activeTab === 'summary' && (
           <SmartSummaryReport
             documents={documents}
-            alerts={safetyData.alerts}
-            riskScore={safetyData.riskScore}
+            alerts={safetyData?.alerts || []}
+            riskScore={safetyData?.riskScore || { score: 0, highRiskCount: 0, mediumRiskCount: 0 }}
             labTrends={labTrends}
             currentLang={currentLang}
           />

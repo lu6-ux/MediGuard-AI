@@ -1,6 +1,6 @@
 import { Language } from '@/types/medical';
 
-export const TRANSLATIONS: Record<Language, Record<string, string>> = {
+export const TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
     appTitle: "MediGuard AI",
     appSubtitle: "Intelligent Medical Document Analysis & Prescription Cross-Checker",

@@ -28,7 +28,7 @@ export function analyzeLabTrends(documents: MedicalDocument[]): LabTrend[] {
 
     const dataPoints: LabTrendDataPoint[] = entries.map(e => ({
       date: e.date,
-      value: e.result.value,
+      value: typeof e.result.value === 'number' ? e.result.value : parseFloat(e.result.value as string) || 0,
       isAbnormal: e.result.isAbnormal,
       visitId: e.visitId,
       docId: e.docId
@@ -38,9 +38,9 @@ export function analyzeLabTrends(documents: MedicalDocument[]): LabTrend[] {
     const lastVal = dataPoints[dataPoints.length - 1].value;
     const minNormal = entries[0].result.minNormal ?? 70;
     const maxNormal = entries[0].result.maxNormal ?? 99;
-    const unit = entries[0].result.unit;
-    const category = entries[0].result.category;
-    const referenceRange = entries[0].result.referenceRange;
+    const unit = entries[0].result.unit || "";
+    const category = entries[0].result.category || "General";
+    const referenceRange = entries[0].result.referenceRange || "";
 
     // Determine Trend Direction
     let trendDirection: 'increasing' | 'decreasing' | 'stable' | 'fluctuating' = 'stable';
