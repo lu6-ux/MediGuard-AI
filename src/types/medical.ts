@@ -1,38 +1,60 @@
-export type Language = 'en' | 'si' | 'ta';
+export type Language = 'en' | 'si' | 'ta' | 'mixed';
 
 export type DocumentType = 
   | 'prescription'
   | 'lab_report'
   | 'doctor_note'
-  | 'discharge_summary';
+  | 'discharge_summary'
+  | 'other';
+
+export type ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW';
 
 export interface Medication {
   id: string;
   name: string;
+  genericName?: string;
   dosage: string;
   frequency: string;
+  route?: string;
   duration?: string;
+  instructions?: string;
   startDate: string;
   prescribedBy: string;
   docId: string;
   visitId: string;
+  sourceDocument?: string;
   status: 'active' | 'changed' | 'discontinued';
   notes?: string;
+  confidence: ConfidenceLevel;
 }
 
 export interface LabResult {
   id: string;
   testName: string;
-  category: string;
-  value: number;
-  unit: string;
-  referenceRange: string;
+  category?: string;
+  value: string | number;
+  unit?: string;
+  referenceRange?: string;
   minNormal?: number;
   maxNormal?: number;
   isAbnormal: boolean;
   testDate: string;
   docId: string;
   visitId: string;
+  sourceDocument?: string;
+  confidence: ConfidenceLevel;
+}
+
+export interface ClinicalFinding {
+  id: string;
+  type: 'symptom' | 'diagnosis' | 'vital_sign' | 'history' | 'plan';
+  description: string;
+  value?: string;
+  date: string;
+  docId: string;
+  visitId: string;
+  sourceDocument?: string;
+  confidence: ConfidenceLevel;
 }
 
 export interface PatientInfo {
@@ -41,12 +63,14 @@ export interface PatientInfo {
   gender: string;
   knownAllergies: string[];
   chronicConditions: string[];
+  confidence: ConfidenceLevel;
 }
 
 export interface ExtractedData {
   patient: PatientInfo;
   medications: Medication[];
   labResults: LabResult[];
+  clinicalFindings: ClinicalFinding[];
   doctorNotes: string;
   recommendations?: string[];
 }
@@ -68,7 +92,8 @@ export type AlertType =
   | 'drug_interaction'
   | 'duplicate_prescription'
   | 'dosage_conflict'
-  | 'allergy_contradiction';
+  | 'allergy_contradiction'
+  | 'missing_info';
 
 export type AlertSeverity = 'high' | 'warning' | 'info';
 
@@ -95,6 +120,7 @@ export interface TimelineEvent {
   docId: string;
   medications: Medication[];
   labHighlights: LabResult[];
+  clinicalFindings: ClinicalFinding[];
   notesSnippet: string;
   alertIds: string[];
 }
@@ -130,6 +156,7 @@ export interface MedicalRiskScore {
   summary: string;
   totalMedicationsAnalyzed?: number;
   totalDocumentsAnalyzed?: number;
+  safetyChecksPerformed?: number;
 }
 
 export interface EvidenceCitation {

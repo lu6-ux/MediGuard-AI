@@ -10,9 +10,10 @@ interface SafetyDashboardProps {
   alerts: SafetyAlert[];
   riskScore: MedicalRiskScore;
   currentLang?: Language;
+  latestClinicalFindings?: string;
 }
 
-export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskScore, currentLang = 'en' }) => {
+export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskScore, currentLang = 'en', latestClinicalFindings = '' }) => {
   const t = TRANSLATIONS[currentLang];
   const getSeverityBadge = (severity: 'high' | 'warning' | 'info') => {
     switch (severity) {
@@ -118,7 +119,7 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
       </div>
 
       {/* Local Doctor Recommendation (Shown for any risk to ensure visibility during demo) */}
-      <DoctorRecommender flagContext={alerts.length > 0 ? alerts[0].type : 'general'} currentLang={currentLang} />
+      <DoctorRecommender flagContext={latestClinicalFindings || (alerts.length > 0 ? alerts[0].type : 'general')} currentLang={currentLang} />
 
       {/* Safety Alerts List */}
       <div className="space-y-4">

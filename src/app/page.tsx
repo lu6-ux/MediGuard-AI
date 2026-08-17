@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { MedicalDocument, Language } from '@/types/medical';
 import { parseDocumentContent } from '@/lib/parser/docParser';
-import { extractStructuredData } from '@/lib/ai/extractor';
 import { analyzePrescriptionSafety } from '@/lib/ai/safetyEngine';
 import { analyzeLabTrends } from '@/lib/ai/labEngine';
 import { TRANSLATIONS } from '@/lib/i18n/translations';
@@ -41,9 +40,61 @@ export default function Home() {
 
   const t = TRANSLATIONS[currentLang];
 
-  // Re-calculate Prescription Safety Alerts & Risk Score whenever documents change
-  const safetyData = useMemo(() => {
-    return analyzePrescriptionSafety(documents);
+  const [safetyData, setSafetyData] = useState<{alerts: any[], riskScore: any} | null>(null);
+  const [isAnalyzingSafety, setIsAnalyzingSafety] = useState(false);
+
+  useEffect(() => {
+    async function runSafetyAnalysis() {
+      if (documents.length === 0) {
+        setSafetyData(null);
+        return;
+      }
+      setIsAnalyzingSafety(true);
+      
+      try {
+        const apiKey = localStorage.getItem('geminiApiKey') || '';
+        
+        // Aggregate allergies and meds
+        const allergies = Array.from(new Set(documents.flatMap(d => d.extractedData?.patient?.knownAllergies || [])));
+        const allMeds = documents.flatMap(d => 
+          (d.extractedData?.medications || []).map(m => ({...m, visitDate: d.visitDate, provider: d.healthcareProvider, docName: d.fileName}))
+        );
+
+        if (allMeds.length === 0) {
+          setSafetyData({
+            alerts: [],
+            riskScore: { score: 100, riskLevel: 'Safe', totalAlerts: 0, highRiskCount: 0, warningCount: 0, infoCount: 0, summary: 'NO MEDICATIONS DETECTED. Upload documents with medications to run safety checks.', totalMedicationsAnalyzed: 0, safetyChecksPerformed: 0 }
+          });
+          setIsAnalyzingSafety(false);
+          return;
+        }
+
+        const res = await fetch('/api/safety', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            medications: allMeds,
+            allergies,
+            apiKey
+          })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          setSafetyData(json.data);
+        } else {
+          // fallback to local if API fails
+          setSafetyData(analyzePrescriptionSafety(documents));
+        }
+      } catch (e) {
+        console.error(e);
+        setSafetyData(analyzePrescriptionSafety(documents));
+      } finally {
+        setIsAnalyzingSafety(false);
+      }
+    }
+    
+    runSafetyAnalysis();
   }, [documents]);
 
   // Re-calculate Longitudinal Lab Trends whenever documents change
@@ -181,37 +232,32 @@ Allergies: Penicillin`;
             text = await file.text();
           }
           
-          const parsed = parseDocumentContent(text || file.name, file.name);
-          
           const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
           const newVisitId = `visit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
 
           if (!isGeminiProcessed) {
-            extracted = extractStructuredData(
-              parsed.rawText, 
-              newDocId, 
-              newVisitId, 
-              parsed.visitDate, 
-              parsed.doctorName
-            );
+            throw new Error("Local fallback disabled. Gemini extraction is required for robust schema.");
           } else {
             // Sync generated DocIds with Gemini's raw JSON
             if (extracted.medications) {
-               extracted.medications = extracted.medications.map((m: any) => ({...m, docId: newDocId, visitId: newVisitId}));
+               extracted.medications = extracted.medications.map((m: any, i: number) => ({...m, id: `med-${newDocId}-${i}`, docId: newDocId, visitId: newVisitId, sourceDocument: file.name}));
             }
             if (extracted.labResults) {
-               extracted.labResults = extracted.labResults.map((l: any) => ({...l, docId: newDocId, visitId: newVisitId}));
+               extracted.labResults = extracted.labResults.map((l: any, i: number) => ({...l, id: `lab-${newDocId}-${i}`, docId: newDocId, visitId: newVisitId, sourceDocument: file.name}));
+            }
+            if (extracted.clinicalFindings) {
+               extracted.clinicalFindings = extracted.clinicalFindings.map((c: any, i: number) => ({...c, id: `cf-${newDocId}-${i}`, docId: newDocId, visitId: newVisitId, sourceDocument: file.name}));
             }
           }
 
           newProcessedDocs.push({
             id: newDocId,
             fileName: file.name,
-            docType: parsed.docType,
-            visitDate: parsed.visitDate,
-            doctorName: parsed.doctorName,
-            healthcareProvider: parsed.healthcareProvider,
-            rawText: parsed.rawText,
+            docType: extracted.docType || 'other',
+            visitDate: extracted.visitDate || new Date().toISOString().split('T')[0],
+            doctorName: extracted.doctorName || 'Unknown Doctor',
+            healthcareProvider: extracted.healthcareProvider || 'Unknown Provider',
+            rawText: text || 'Extracted via Vision AI',
             extractedData: extracted,
             status: 'processed',
             uploadDate: new Date().toISOString()
@@ -222,7 +268,7 @@ Allergies: Penicillin`;
         }
       }
 
-      setDocuments(newProcessedDocs);
+      setDocuments(prev => [...prev, ...newProcessedDocs]);
     } catch (e) {
       console.error("Batch file parse error", e);
     } finally {
@@ -339,6 +385,7 @@ Allergies: Penicillin`;
               alerts={safetyData.alerts}
               riskScore={safetyData.riskScore}
               currentLang={currentLang}
+              latestClinicalFindings={documents[documents.length - 1]?.extractedData?.clinicalFindings?.map(f => f.description).join(', ')}
             />
 
             <LabTrendVisualizer
@@ -356,6 +403,7 @@ Allergies: Penicillin`;
             alerts={safetyData.alerts}
             riskScore={safetyData.riskScore}
             currentLang={currentLang}
+            latestClinicalFindings={documents[documents.length - 1]?.extractedData?.clinicalFindings?.map(f => f.description).join(', ')}
           />
         )}
 

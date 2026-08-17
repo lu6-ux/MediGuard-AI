@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const maxDuration = 30; // Max serverless function duration
+export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,156 +14,167 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
     const prompt = `
-      You are an expert medical data extraction AI.
-      Read the attached medical document (prescription, lab report, or doctor note).
-      Extract the following information and format it STRICTLY as a JSON object matching this TypeScript interface:
+You are an expert medical data extraction AI.
+Read the attached medical document.
+DO NOT fabricate information. If a field is uncertain, extract what you can and set confidence to "LOW" or "MEDIUM".
 
-      interface ExtractedData {
-        patient: {
-          name: string; // Patient name
-          age: number; // Age in years (integer), default to 0 if unknown
-          gender: string; // 'M', 'F', or 'Unknown'
-          knownAllergies: string[]; // List of allergies explicitly mentioned
-          chronicConditions: string[]; // List of chronic conditions/diagnoses mentioned
-        };
-        medications: {
-          id: string; // Generate a random short UUID or string (e.g. "med-1")
-          name: string; // Name of the drug
-          dosage: string; // e.g. "500mg"
-          frequency: string; // e.g. "Twice daily" or "BD"
-          duration?: string; // e.g. "5 days"
-          startDate: string; // YYYY-MM-DD
-          prescribedBy: string; // Doctor name
-          docId: string; // Use "doc-api"
-          visitId: string; // Use "visit-api"
-          status: "active" | "changed" | "discontinued";
-        }[];
-        doctorNotes: string; // Any general clinical notes, findings, or advice
-        recommendations?: string[];
-      }
+Extract the information and format it STRICTLY as a JSON object matching this TypeScript interface.
+DO NOT wrap the output in markdown \`\`\`json blocks. Just return the raw JSON object.
 
-      Ensure the JSON is perfectly valid and contains no markdown formatting outside of the JSON structure itself.
-      Only return the JSON.
-    `;
-
-    const savedProvider = 'gemini';
-    const file = { type: mimeType || 'image/jpeg' };
-    
-    let isGeminiProcessed = false;
-    let extracted: Record<string, any> = {};
-
-    if (savedProvider === 'gemini') {
-      console.log(`Using Gemini API (Vision) with fetch fallback for AQ keys...`);
-        
-        let prompt = `You are a medical data extraction AI. Extract the structured medical data from this medical document (image). 
-Return ONLY a valid JSON object matching this schema, no markdown, no other text:
 {
-  "patientName": "string or Unknown",
-  "visitDate": "YYYY-MM-DD or Unknown",
+  "docType": "prescription" | "lab_report" | "doctor_note" | "discharge_summary" | "other",
+  "visitDate": "YYYY-MM-DD" | "Unknown",
   "doctorName": "string or Unknown",
-  "medications": ["string"],
-  "labResults": ["string"],
-  "allergies": ["string"]
-}`;
+  "healthcareProvider": "string or Unknown",
+  "extractedData": {
+    "patient": {
+      "name": "string",
+      "age": 0,
+      "gender": "M" | "F" | "Unknown",
+      "knownAllergies": ["string"],
+      "chronicConditions": ["string"]
+    },
+    "medications": [
+      {
+        "id": "generate random string",
+        "name": "string",
+        "dosage": "string",
+        "frequency": "string",
+        "duration": "string",
+        "confidence": "HIGH" | "MEDIUM" | "LOW"
+      }
+    ],
+    "labResults": [
+      {
+        "id": "generate random string",
+        "testName": "string",
+        "value": "string or number",
+        "unit": "string",
+        "referenceRange": "string",
+        "isAbnormal": boolean,
+        "confidence": "HIGH" | "MEDIUM" | "LOW"
+      }
+    ],
+    "clinicalFindings": [
+      {
+        "id": "generate random string",
+        "type": "symptom" | "diagnosis" | "vital_sign" | "other",
+        "description": "string",
+        "value": "string",
+        "confidence": "HIGH" | "MEDIUM" | "LOW"
+      }
+    ],
+    "doctorNotes": ["string (Any general clinical notes, findings, or advice)"],
+    "recommendations": ["string"]
+  }
+}
 
-        // Ensure proper mime type
-        const mimeType = file.type || 'image/jpeg';
+Important Rules:
+1. "medications": Do not return "NO MEDICATIONS DETECTED". If none exist, return an empty array []. If text is unreadable but looks like a medication, extract your best guess and mark confidence "LOW".
+2. "labResults": Find lab values even if they are buried inside paragraphs.
+3. "clinicalFindings": Extract symptoms, diagnoses, and vital signs separately from medications.
+`;
+
+    const modelsToTry = [
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-1.0-pro-vision-latest'
+    ];
+
+    let resultText = null;
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Trying model via fetch: ${modelName}`);
         
-        const modelsToTry = [
-          'gemini-1.5-flash',
-          'gemini-1.5-pro',
-          'gemini-1.5-flash-8b',
-          'gemini-1.0-pro-vision-latest',
-          'gemini-pro-vision'
-        ];
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: mimeType || 'image/jpeg',
+                    data: base64Image.split(',')[1] || base64Image
+                  }
+                }
+              ]
+            }]
+          })
+        });
 
-        let resultText = null;
-        let lastError = null;
-
-        for (const modelName of modelsToTry) {
-          try {
-            console.log(`Trying model via fetch: ${modelName}`);
-            
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { text: prompt },
-                    {
-                      inlineData: {
-                        mimeType: mimeType,
-                        data: base64Image
-                      }
-                    }
-                  ]
-                }]
-              })
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json().catch(() => ({}));
-              throw new Error(`[${response.status}] ${response.statusText} - ${JSON.stringify(errorData)}`);
-            }
-
-            const data = await response.json();
-            
-            if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-              resultText = data.candidates[0].content.parts[0].text;
-              console.log(`Success with model ${modelName}`);
-              break;
-            } else {
-              throw new Error("Invalid response structure from Gemini API");
-            }
-            
-          } catch (err: any) {
-            console.warn(`Model ${modelName} failed:`, err.message);
-            lastError = err;
-          }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        if (!resultText) {
-          // Diagnostic fallback
-          try {
-            const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-            if (listRes.ok) {
-              const data = await listRes.json();
-              const availableModels = data.models
-                .map((m: any) => m.name.replace('models/', ''))
-                .filter((name: string) => name.includes('gemini'))
-                .join(', ');
-              
-              throw new Error(`Your API Key is restricted. It only has access to these models: ${availableModels || 'None'}. Please generate a new key at aistudio.google.com!`);
-            }
-          } catch (listErr) {}
-          
-          throw lastError || new Error("All Gemini models failed.");
-        }
-
-        // Clean up markdown formatting if the model wraps it in ```json ... ```
-        let jsonString = resultText.trim();
-        if (jsonString.startsWith('```json')) {
-          jsonString = jsonString.slice(7, -3).trim();
-        } else if (jsonString.startsWith('```')) {
-          jsonString = jsonString.slice(3, -3).trim();
-        }
-
-        extracted = JSON.parse(jsonString);
-        isGeminiProcessed = true;
+        const data = await response.json();
+        resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (resultText) break;
+      } catch (err) {
+        lastError = err;
+      }
     }
-      
-    return NextResponse.json({ data: extracted });
+
+    if (!resultText) {
+      throw lastError || new Error("All Gemini models failed");
+    }
+
+    let jsonString = resultText.trim();
+    if (jsonString.startsWith('\`\`\`json')) {
+      jsonString = jsonString.slice(7, -3).trim();
+    } else if (jsonString.startsWith('\`\`\`')) {
+      jsonString = jsonString.slice(3, -3).trim();
+    }
+
+    const extracted = JSON.parse(jsonString);
+
+    const docId = `doc-${Date.now()}`;
     
+    // Default mapped values
+    extracted.extractedData.medications = (extracted.extractedData.medications || []).map((m: any) => ({
+      ...m,
+      id: m.id || `med-${Math.random()}`,
+      startDate: extracted.visitDate,
+      prescribedBy: extracted.doctorName,
+      docId: docId,
+      visitId: `visit-${extracted.visitDate}`,
+      status: "active"
+    }));
+
+    extracted.extractedData.labResults = (extracted.extractedData.labResults || []).map((l: any) => ({
+      ...l,
+      id: l.id || `lab-${Math.random()}`,
+      date: extracted.visitDate,
+      docId: docId,
+      visitId: `visit-${extracted.visitDate}`
+    }));
+
+    extracted.extractedData.clinicalFindings = (extracted.extractedData.clinicalFindings || []).map((f: any) => ({
+      ...f,
+      id: f.id || `find-${Math.random()}`
+    }));
+
+    return NextResponse.json({
+      success: true,
+      document: {
+        id: docId,
+        fileName: fileName || "uploaded_doc.pdf",
+        docType: extracted.docType || "other",
+        visitDate: extracted.visitDate || new Date().toISOString().split('T')[0],
+        doctorName: extracted.doctorName || "Unknown",
+        healthcareProvider: extracted.healthcareProvider || "Unknown",
+        extractedData: extracted.extractedData
+      }
+    });
+
   } catch (error: any) {
-    console.error('Gemini Extraction Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to extract data using Gemini API.' },
-      { status: 500 }
-    );
+    console.error("API error in extract", error);
+    return NextResponse.json({ error: error.message || "Failed to process medical document" }, { status: 500 });
   }
 }
