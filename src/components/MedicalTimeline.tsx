@@ -6,9 +6,10 @@ import { MedicalDocument, DocumentType } from '@/types/medical';
 
 interface MedicalTimelineProps {
   documents: MedicalDocument[];
+  t?: Record<string, string>;
 }
 
-export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents }) => {
+export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }) => {
   const [filterType, setFilterType] = useState<string>('all');
   const [expandedDocId, setExpandedDocId] = useState<string | null>(documents[0]?.id || null);
 
@@ -65,10 +66,10 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents }) =
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <Calendar className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-            <span>Chronological Patient Medical Timeline</span>
+            <span>{t?.timelineHeader || "Chronological Patient Medical Timeline"}</span>
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Aggregated multi-visit history across healthcare providers
+            {t?.timelineDesc || "Aggregated multi-visit history across healthcare providers"}
           </p>
         </div>
 
@@ -78,19 +79,19 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents }) =
             onClick={() => setFilterType('all')}
             className={`px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition flex-1 sm:flex-none ${filterType === 'all' ? 'bg-emerald-500 text-white dark:text-slate-950' : 'text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'}`}
           >
-            All Visits ({sortedVisits.length})
+            {t?.timelineAllVisits ? `${t.timelineAllVisits} (${sortedVisits.length})` : `All Visits (${sortedVisits.length})`}
           </button>
           <button
             onClick={() => setFilterType('prescription')}
             className={`px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition flex-1 sm:flex-none ${filterType === 'prescription' ? 'bg-emerald-500 text-white dark:text-slate-950' : 'text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'}`}
           >
-            Prescriptions
+            {t?.timelinePrescriptions || "Prescriptions"}
           </button>
           <button
             onClick={() => setFilterType('lab_report')}
             className={`px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition flex-1 sm:flex-none ${filterType === 'lab_report' ? 'bg-emerald-500 text-white dark:text-slate-950' : 'text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'}`}
           >
-            Lab Reports
+            {t?.timelineLabReports || "Lab Reports"}
           </button>
         </div>
       </div>

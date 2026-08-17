@@ -412,7 +412,7 @@ Allergies: Penicillin`;
         )}
 
         {activeTab === 'timeline' && (
-          <MedicalTimeline documents={documents} />
+          <MedicalTimeline documents={documents} t={t} />
         )}
 
         {activeTab === 'safety' && (
