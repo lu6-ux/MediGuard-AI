@@ -212,6 +212,9 @@ Important Rules:
       visitId: `visit-${extracted.visitDate || 'unknown'}`
     }));
 
+    extracted.extractedData.doctorNotes = extracted.extractedData.doctorNotes || [];
+    extracted.extractedData.recommendations = extracted.extractedData.recommendations || [];
+
     return NextResponse.json({
       success: true,
       document: {
