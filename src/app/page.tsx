@@ -226,9 +226,9 @@ Allergies: Penicillin`;
                // Let it fall through to local Regex extraction
             } else {
                const result = await response.json();
-               extracted = result.data;
+               extracted = result.document.extractedData;
                isGeminiProcessed = true;
-               text = extracted.doctorNotes || "Extracted perfectly via Gemini Vision";
+               text = (extracted.doctorNotes && extracted.doctorNotes.length > 0) ? extracted.doctorNotes.join('\n') : "Extracted perfectly via Gemini Vision";
             }
           }
           else if (file.type.startsWith('image/')) {
