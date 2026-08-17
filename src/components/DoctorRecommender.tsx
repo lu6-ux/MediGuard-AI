@@ -49,24 +49,56 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
 
-  // Map the flag to a real medical specialty based on issue context
+  // Map the flag to a real medical specialty based on issue context (Advanced Offline Mapper)
   const getSpecialtyFromFlag = (flag: string) => {
     const lowerFlag = flag.toLowerCase();
-    if (lowerFlag.includes('cardio') || lowerFlag.includes('heart') || lowerFlag.includes('blood_pressure') || lowerFlag.includes('hypertension')) {
+    
+    // Cardiovascular
+    if (lowerFlag.match(/cardio|heart|blood_pressure|hypertension|arrhythmia|cholesterol|statin|warfarin|ecg/i)) {
       return 'Cardiologist';
     }
-    if (lowerFlag.includes('kidney') || lowerFlag.includes('creatinine') || lowerFlag.includes('renal')) {
+    // Nephrology
+    if (lowerFlag.match(/kidney|creatinine|renal|egfr|dialysis|nephro/i)) {
       return 'Nephrologist';
     }
-    if (lowerFlag.includes('diabetes') || lowerFlag.includes('glucose') || lowerFlag.includes('hba1c')) {
+    // Endocrinology / Diabetes
+    if (lowerFlag.match(/diabetes|glucose|hba1c|thyroid|insulin|endocrine|metformin/i)) {
       return 'Endocrinologist';
     }
-    if (lowerFlag.includes('allergy')) {
-      return 'Allergist or Pharmacist';
+    // Pulmonology
+    if (lowerFlag.match(/asthma|copd|lung|pulmonary|respiratory|inhaler|breath/i)) {
+      return 'Pulmonologist';
     }
-    if (lowerFlag.includes('drug') || lowerFlag.includes('dosage') || lowerFlag.includes('duplicate') || lowerFlag.includes('interaction')) {
-      return 'Pharmacist or General Physician';
+    // Neurology
+    if (lowerFlag.match(/neuro|brain|seizure|epilepsy|migraine|parkinson|stroke/i)) {
+      return 'Neurologist';
     }
+    // Gastroenterology
+    if (lowerFlag.match(/gastro|liver|stomach|ulcer|reflux|gerd|hepatitis/i)) {
+      return 'Gastroenterologist';
+    }
+    // Oncology
+    if (lowerFlag.match(/cancer|tumor|chemo|oncolog|malignan/i)) {
+      return 'Oncologist';
+    }
+    // Psychiatry
+    if (lowerFlag.match(/depress|anxiety|psychiatry|mental|sleep|insomnia/i)) {
+      return 'Psychiatrist';
+    }
+    // Allergic / Immunologic
+    if (lowerFlag.match(/allergy|anaphylaxis|immune|autoimmune|rash/i)) {
+      return 'Immunologist or Allergist';
+    }
+    // Drug Interactions / Safety (Default to Pharmacist for pure drug issues)
+    if (lowerFlag.match(/drug|dosage|duplicate|interaction|contraindication|toxicity|overdose/i)) {
+      return 'Clinical Pharmacist or General Physician';
+    }
+    // Pregnancy / OBGYN
+    if (lowerFlag.match(/pregnan|maternal|fetal|teratogen|obgyn/i)) {
+      return 'Obstetrician/Gynecologist';
+    }
+    
+    // Fallback
     return 'General Physician';
   };
 
@@ -84,7 +116,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
       const response = await fetch('/api/doctors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ specialty, location, availability }),
+        body: JSON.stringify({ specialty, location, availability, time }),
       });
 
       const data = await response.json();
@@ -101,8 +133,20 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
           if (doc.lat && doc.lng) {
             doc.distance = parseFloat(calculateDistance(userCoords.lat, userCoords.lng, doc.lat, doc.lng));
           }
+          
+          // Smart Ranking Formula: Higher is better
+          // Rating gives up to 50 points (rating * 10). Distance penalizes (2 points per km).
+          const ratingScore = (doc.rating || 3.0) * 10; 
+          const distancePenalty = (doc.distance || 50) * 2;
+          // @ts-ignore
+          doc.smartScore = ratingScore - distancePenalty;
+          
           return doc;
-        }).sort((a, b) => (a.distance || 999) - (b.distance || 999));
+        // @ts-ignore
+        }).sort((a, b) => (b.smartScore || 0) - (a.smartScore || 0));
+      } else {
+        // If no coords, just sort by rating
+        processedResults = processedResults.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       }
 
       setResults(processedResults);
@@ -224,14 +268,34 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContex
 
       {/* Error State */}
       {error && (
-        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-start space-x-2 text-rose-300 text-sm">
+        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-start space-x-2 text-rose-300 text-sm animate-pulse mb-4">
           <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
+      {/* Loading Skeleton State */}
+      {isSearching && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 animate-pulse">
+              <div className="h-4 bg-slate-800 rounded w-3/4 mb-3" />
+              <div className="h-3 bg-slate-800 rounded w-1/2 mb-4" />
+              <div className="space-y-2">
+                <div className="h-3 bg-slate-800 rounded w-full" />
+                <div className="h-3 bg-slate-800 rounded w-2/3" />
+              </div>
+              <div className="flex space-x-3 mt-4">
+                <div className="h-3 bg-slate-800 rounded w-20" />
+                <div className="h-3 bg-slate-800 rounded w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Results State */}
-      {results !== null && (
+      {!isSearching && results !== null && (
         <div className="space-y-3">
           {results.length === 0 ? (
             <div className="text-center py-6 px-4 border border-slate-800 rounded-xl bg-slate-950">
