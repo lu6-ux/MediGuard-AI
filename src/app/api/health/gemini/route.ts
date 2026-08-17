@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    let modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    if (modelName.includes('1.0-pro-vision')) modelName = "gemini-2.5-flash";
 
     if (!apiKey) {
       return NextResponse.json({
