@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Bot, User, Send, Sparkles, FileText, CheckCircle2, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { ChatMessage, MedicalDocument, Language } from '@/types/medical';
 import { TRANSLATIONS } from '@/lib/i18n/translations';
-import { answerMedicalQuestion } from '@/lib/ai/ragEngine';
+
 
 interface AIChatAssistantProps {
   documents: MedicalDocument[];
@@ -24,27 +24,18 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
     t.chatQ4
   ];
 
-  // Dynamically retranslate the entire chat history when the language changes
+  // Dynamically retranslate the user suggested questions when the language changes
   React.useEffect(() => {
     setMessages(prev => prev.map(msg => {
       if (msg.sender === 'user' && msg.suggestedIndex !== undefined) {
         // Retranslate suggested user questions
         return { ...msg, text: sampleQuestions[msg.suggestedIndex] };
       }
-      if (msg.sender === 'ai' && msg.originalQuery) {
-        // Re-run the RAG engine for the AI's previous answer using the new language
-        const ragResult = answerMedicalQuestion(msg.originalQuery, documents, currentLang);
-        return { 
-          ...msg, 
-          text: ragResult.answer,
-          disclaimer: ragResult.disclaimer 
-        };
-      }
-      return msg; // Leave custom-typed user questions as-is
+      return msg; // Leave custom-typed user questions and previous AI answers as-is
     }));
-  }, [currentLang, documents]);
+  }, [currentLang]);
 
-  const handleSend = (textToSend?: string, suggestedIndex?: number) => {
+  const handleSend = async (textToSend?: string, suggestedIndex?: number) => {
     const query = textToSend || inputText;
     if (!query.trim()) return;
 
@@ -60,23 +51,54 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
     if (!textToSend) setInputText("");
     setIsThinking(true);
 
-    setTimeout(() => {
-      const ragResult = answerMedicalQuestion(query, documents, currentLang);
+    try {
+      const apiKey = localStorage.getItem('geminiApiKey') || '';
+      
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          question: query,
+          documents: documents,
+          apiKey: apiKey,
+          language: currentLang
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to get AI response");
+      }
 
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: "ai",
-        text: ragResult.answer,
+        text: data.answer,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        confidenceScore: ragResult.confidenceScore,
-        citations: ragResult.citations,
-        disclaimer: ragResult.disclaimer,
+        confidenceScore: data.confidenceScore,
+        citations: data.citations,
+        disclaimer: data.disclaimer,
         originalQuery: query
       };
 
       setMessages(prev => [...prev, aiMsg]);
+    } catch (error: any) {
+      console.error(error);
+      const errorMsg: ChatMessage = {
+        id: `ai-error-${Date.now()}`,
+        sender: "ai",
+        text: `Error: ${error.message}. Please check your API key and try again.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        confidenceScore: 0,
+        originalQuery: query
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setIsThinking(false);
-    }, 600);
+    }
   };
 
   return (
