@@ -84,10 +84,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span>Google Gemini 1.5</span>
+                  <span>Google Gemini</span>
                   <Key className="h-4 w-4 text-teal-500 dark:text-teal-400" />
                 </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">Gemini Flash / Pro API</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">Gemini Multimodal API</span>
               </button>
             </div>
           </div>

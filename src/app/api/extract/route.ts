@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const maxDuration = 60; // Increased duration limit
 
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     console.log(`[EXTRACT] Gemini configured via server env: ${!!serverApiKey}`);
     
     // We prioritize the server environment variable to keep secrets secure.
-    // If not set on the server, we fallback to clientApiKey only for debugging/local modes if absolutely necessary.
+    // Fallback to clientApiKey only for legacy compatibility or local debugging if allowed.
     const finalApiKey = serverApiKey || clientApiKey;
 
     if (!finalApiKey) {
@@ -107,73 +108,48 @@ Important Rules:
 3. "clinicalFindings": Extract symptoms, diagnoses, and vital signs separately from medications.
 `;
 
-    const modelsToTry = [
-      'gemini-1.5-flash',
-      'gemini-1.5-pro',
-      'gemini-1.0-pro-vision-latest'
-    ];
-
-    let resultText = null;
-    let lastError = null;
-    let successfulModel = null;
-
     // Remove data:image/... prefix if present
     const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
 
-    for (const modelName of modelsToTry) {
-      try {
-        console.log(`[EXTRACT] Model: ${modelName}`);
-        
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${finalApiKey}`;
-        console.log(`[EXTRACT] Request sent to Gemini`);
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType: mimeType || 'image/jpeg',
-                    data: cleanBase64
-                  }
-                }
-              ]
-            }]
-          })
-        });
+    const geminiModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    console.log(`[EXTRACT] Selected Gemini Model: ${geminiModel}`);
 
-        console.log(`[EXTRACT] Gemini response received. Status: ${response.status}`);
+    let resultText = null;
+    
+    try {
+      const genAI = new GoogleGenerativeAI(finalApiKey);
+      const model = genAI.getGenerativeModel({ model: geminiModel });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`[EXTRACT] Gemini error response text: ${errorText}`);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      console.log(`[EXTRACT] Sending request via GoogleGenerativeAI SDK`);
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            data: cleanBase64,
+            mimeType: mimeType || 'image/jpeg'
+          }
         }
-
-        const data = await response.json();
-        resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (resultText) {
-          successfulModel = modelName;
-          console.log(`[EXTRACT] Model ${modelName} succeeded`);
-          break;
-        } else {
-          console.log(`[EXTRACT] Model ${modelName} returned empty text`);
-        }
-      } catch (err: any) {
-        console.error(`[EXTRACT] Gemini error for ${modelName}`);
-        console.error(`[EXTRACT] Status: ${err?.status || 'Unknown'}`);
-        console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
-        lastError = err;
+      ]);
+      
+      const response = await result.response;
+      resultText = response.text();
+      console.log(`[EXTRACT] Model ${geminiModel} succeeded`);
+      
+    } catch (err: any) {
+      console.error(`[EXTRACT] Gemini SDK error for ${geminiModel}`);
+      console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
+      
+      // Classify error type
+      if (err?.message?.includes("is not found") || err?.message?.includes("404")) {
+        return NextResponse.json({ error: `GEMINI_MODEL_NOT_FOUND: The model ${geminiModel} is not available or valid.` }, { status: 404 });
       }
+      
+      return NextResponse.json({ error: `UNKNOWN_EXTRACTION_ERROR: ${err?.message || 'Gemini SDK execution failed.'}` }, { status: 500 });
     }
 
     if (!resultText) {
-      console.error("[EXTRACT] All Gemini models failed");
-      return NextResponse.json({ error: lastError?.message || "All Gemini models failed" }, { status: 500 });
+      console.error("[EXTRACT] Gemini model returned empty text");
+      return NextResponse.json({ error: "Gemini model returned empty text" }, { status: 500 });
     }
 
     console.log(`[EXTRACT] Parsing JSON output...`);
@@ -200,7 +176,7 @@ Important Rules:
       console.error(`[EXTRACT] Response parsed: false`);
       console.error(`[EXTRACT] Parse Error:`, parseError);
       console.error(`[EXTRACT] Output to parse was:`, resultText.substring(0, 500) + '...');
-      return NextResponse.json({ error: "Failed to parse Gemini output as JSON" }, { status: 500 });
+      return NextResponse.json({ error: "SCHEMA_VALIDATION_ERROR: Failed to parse Gemini output as JSON" }, { status: 500 });
     }
 
     const docId = `doc-${Date.now()}`;
@@ -252,6 +228,6 @@ Important Rules:
 
   } catch (error: any) {
     console.error("[EXTRACT] Unhandled API error:", error);
-    return NextResponse.json({ error: error.message || "Failed to process medical document" }, { status: 500 });
+    return NextResponse.json({ error: `UNKNOWN_EXTRACTION_ERROR: ${error.message || "Failed to process medical document"}` }, { status: 500 });
   }
 }
