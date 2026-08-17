@@ -111,9 +111,9 @@ Important Rules:
     // Remove data:image/... prefix if present
     const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
 
-    let geminiModel = (process.env.GEMINI_MODEL || "gemini-2.5-flash").trim().replace(/['"]/g, '');
+    let geminiModel = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim().replace(/['"]/g, '');
     if (geminiModel.includes('1.0-pro-vision')) {
-        geminiModel = "gemini-2.5-flash";
+        geminiModel = "gemini-3.6-flash";
     }
     console.log(`[EXTRACT] Selected Gemini Model: ${geminiModel}`);
 

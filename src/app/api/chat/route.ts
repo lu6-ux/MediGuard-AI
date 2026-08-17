@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    let geminiModel = (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim().replace(/['"]/g, '');
-    if (geminiModel.includes('1.0-pro-vision')) geminiModel = 'gemini-2.5-flash';
+    let geminiModel = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim().replace(/['"]/g, '');
+    if (geminiModel.includes('1.0-pro-vision')) geminiModel = 'gemini-3.6-flash';
     const model = genAI.getGenerativeModel({ model: geminiModel });
 
     // Build context payload

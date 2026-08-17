@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    let modelName = (process.env.GEMINI_MODEL || "gemini-2.5-flash").trim().replace(/['"]/g, '');
-    if (modelName.includes('1.0-pro-vision')) modelName = "gemini-2.5-flash";
+    let modelName = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim().replace(/['"]/g, '');
+    if (modelName.includes('1.0-pro-vision')) modelName = "gemini-3.6-flash";
 
     if (!apiKey) {
       return NextResponse.json({
@@ -47,7 +47,7 @@ export async function GET() {
     const models = data.models || [];
     
     // Check if our exact model exists in the list
-    // Note: The API returns model names with the prefix 'models/', e.g., 'models/gemini-2.5-flash'
+    // Note: The API returns model names with the prefix 'models/', e.g., 'models/gemini-3.6-flash'
     const targetModelPath = `models/${modelName}`;
     const foundModel = models.find((m: any) => m.name === targetModelPath);
 
