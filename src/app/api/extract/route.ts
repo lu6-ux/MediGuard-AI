@@ -118,32 +118,40 @@ Important Rules:
     console.log(`[EXTRACT] Selected Gemini Model: ${geminiModel}`);
 
     let resultText = null;
+    let fallbackModels = [geminiModel, "gemini-3.6-pro", "gemini-2.0-flash"];
+    let lastError: any = null;
     
-    try {
-      const genAI = new GoogleGenerativeAI(finalApiKey);
-      const model = genAI.getGenerativeModel({ model: geminiModel });
+    for (const currentModel of fallbackModels) {
+      try {
+        const genAI = new GoogleGenerativeAI(finalApiKey);
+        const model = genAI.getGenerativeModel({ model: currentModel });
 
-      console.log(`[EXTRACT] Sending request via GoogleGenerativeAI SDK`);
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            data: cleanBase64,
-            mimeType: mimeType || 'image/jpeg'
+        console.log(`[EXTRACT] Sending request via GoogleGenerativeAI SDK to ${currentModel}`);
+        const result = await model.generateContent([
+          prompt,
+          {
+            inlineData: {
+              data: cleanBase64,
+              mimeType: mimeType || 'image/jpeg'
+            }
           }
-        }
-      ]);
-      
-      const response = await result.response;
-      resultText = response.text();
-      console.log(`[EXTRACT] Model ${geminiModel} succeeded`);
-      
-    } catch (err: any) {
-      console.error(`[EXTRACT] Gemini SDK error for ${geminiModel}`);
-      console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
-      
-      // Return the actual raw error message so we can debug it!
-      return NextResponse.json({ error: `SDK_ERROR: ${err?.message || 'Unknown error'}` }, { status: 500 });
+        ]);
+        
+        const response = await result.response;
+        resultText = response.text();
+        console.log(`[EXTRACT] Model ${currentModel} succeeded`);
+        break; // Success!
+        
+      } catch (err: any) {
+        console.error(`[EXTRACT] Gemini SDK error for ${currentModel}`);
+        console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
+        lastError = err;
+      }
+    }
+
+    if (!resultText) {
+      console.error("[EXTRACT] All fallback models failed.");
+      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All fallback models failed'}` }, { status: 500 });
     }
 
     if (!resultText) {

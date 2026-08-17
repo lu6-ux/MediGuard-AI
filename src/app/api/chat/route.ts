@@ -65,8 +65,25 @@ Output a valid JSON object matching exactly this structure:
 Do NOT output markdown \`\`\`json blocks. Return ONLY raw JSON.
 `;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    let responseText = null;
+    let fallbackModels = [geminiModel, 'gemini-3.6-pro', 'gemini-2.0-flash'];
+    let lastError: any = null;
+
+    for (const currentModel of fallbackModels) {
+      try {
+        const model = genAI.getGenerativeModel({ model: currentModel });
+        const result = await model.generateContent(prompt);
+        responseText = result.response.text();
+        break; // Success!
+      } catch (err: any) {
+        console.error(`[CHAT] Gemini SDK error for ${currentModel}`, err);
+        lastError = err;
+      }
+    }
+
+    if (!responseText) {
+      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All fallback models failed'}` }, { status: 500 });
+    }
     
     let jsonString = responseText.trim();
     if (jsonString.startsWith('\`\`\`json')) {
