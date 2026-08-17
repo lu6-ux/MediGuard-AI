@@ -1,16 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const maxDuration = 30;
+export const maxDuration = 60; // Increased duration limit
 
 export async function POST(request: NextRequest) {
   try {
-    const { base64Image, mimeType, apiKey, fileName } = await request.json();
+    console.log("[EXTRACT] Request received");
+    
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      console.error("[EXTRACT] JSON parse error on request body", e);
+      return NextResponse.json({ error: 'Invalid JSON request body' }, { status: 400 });
+    }
 
-    if (!base64Image || !apiKey) {
+    const { base64Image, mimeType, apiKey: clientApiKey, fileName } = body;
+
+    console.log(`[EXTRACT] Filename: ${fileName || 'Unknown'}`);
+    console.log(`[EXTRACT] MIME type: ${mimeType || 'Unknown'}`);
+    
+    if (!base64Image) {
+      console.error("[EXTRACT] Error: base64Image is missing");
       return NextResponse.json(
-        { error: 'Missing required parameters: base64Image or apiKey' },
+        { error: 'Missing required parameter: base64Image' },
         { status: 400 }
+      );
+    }
+
+    const estimatedSize = Math.round((base64Image.length * 3) / 4);
+    console.log(`[EXTRACT] File size (estimated bytes): ${estimatedSize}`);
+
+    const serverApiKey = process.env.GEMINI_API_KEY;
+    console.log(`[EXTRACT] Gemini configured via server env: ${!!serverApiKey}`);
+    
+    // We prioritize the server environment variable to keep secrets secure.
+    // If not set on the server, we fallback to clientApiKey only for debugging/local modes if absolutely necessary.
+    const finalApiKey = serverApiKey || clientApiKey;
+
+    if (!finalApiKey) {
+      console.error("[EXTRACT] Error: No Gemini API Key available");
+      return NextResponse.json(
+        { error: 'Server Error: GEMINI_API_KEY is not configured on the server.' },
+        { status: 500 }
       );
     }
 
@@ -84,12 +115,18 @@ Important Rules:
 
     let resultText = null;
     let lastError = null;
+    let successfulModel = null;
+
+    // Remove data:image/... prefix if present
+    const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
 
     for (const modelName of modelsToTry) {
       try {
-        console.log(`Trying model via fetch: ${modelName}`);
+        console.log(`[EXTRACT] Model: ${modelName}`);
         
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${finalApiKey}`;
+        console.log(`[EXTRACT] Request sent to Gemini`);
+        
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -100,7 +137,7 @@ Important Rules:
                 {
                   inlineData: {
                     mimeType: mimeType || 'image/jpeg',
-                    data: base64Image.split(',')[1] || base64Image
+                    data: cleanBase64
                   }
                 }
               ]
@@ -108,56 +145,96 @@ Important Rules:
           })
         });
 
+        console.log(`[EXTRACT] Gemini response received. Status: ${response.status}`);
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          console.error(`[EXTRACT] Gemini error response text: ${errorText}`);
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
         const data = await response.json();
         resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
-        if (resultText) break;
-      } catch (err) {
+        if (resultText) {
+          successfulModel = modelName;
+          console.log(`[EXTRACT] Model ${modelName} succeeded`);
+          break;
+        } else {
+          console.log(`[EXTRACT] Model ${modelName} returned empty text`);
+        }
+      } catch (err: any) {
+        console.error(`[EXTRACT] Gemini error for ${modelName}`);
+        console.error(`[EXTRACT] Status: ${err?.status || 'Unknown'}`);
+        console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
         lastError = err;
       }
     }
 
     if (!resultText) {
-      throw lastError || new Error("All Gemini models failed");
+      console.error("[EXTRACT] All Gemini models failed");
+      return NextResponse.json({ error: lastError?.message || "All Gemini models failed" }, { status: 500 });
     }
 
+    console.log(`[EXTRACT] Parsing JSON output...`);
+    
+    // Robust JSON Extraction
     let jsonString = resultText.trim();
-    if (jsonString.startsWith('\`\`\`json')) {
-      jsonString = jsonString.slice(7, -3).trim();
-    } else if (jsonString.startsWith('\`\`\`')) {
-      jsonString = jsonString.slice(3, -3).trim();
+    
+    const jsonMatch = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch && jsonMatch[1]) {
+        jsonString = jsonMatch[1].trim();
+    } else {
+        const firstBrace = resultText.indexOf('{');
+        const lastBrace = resultText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            jsonString = resultText.slice(firstBrace, lastBrace + 1);
+        }
     }
 
-    const extracted = JSON.parse(jsonString);
+    let extracted;
+    try {
+      extracted = JSON.parse(jsonString);
+      console.log(`[EXTRACT] Response parsed: true`);
+    } catch (parseError) {
+      console.error(`[EXTRACT] Response parsed: false`);
+      console.error(`[EXTRACT] Parse Error:`, parseError);
+      console.error(`[EXTRACT] Output to parse was:`, resultText.substring(0, 500) + '...');
+      return NextResponse.json({ error: "Failed to parse Gemini output as JSON" }, { status: 500 });
+    }
 
     const docId = `doc-${Date.now()}`;
     
-    // Default mapped values
+    // Ensure nested objects exist to avoid undefined errors
+    if (!extracted.extractedData) {
+       extracted.extractedData = {};
+    }
+    
     extracted.extractedData.medications = (extracted.extractedData.medications || []).map((m: any) => ({
       ...m,
       id: m.id || `med-${Math.random()}`,
-      startDate: extracted.visitDate,
-      prescribedBy: extracted.doctorName,
+      startDate: extracted.visitDate || new Date().toISOString().split('T')[0],
+      prescribedBy: extracted.doctorName || "Unknown",
       docId: docId,
-      visitId: `visit-${extracted.visitDate}`,
+      visitId: `visit-${extracted.visitDate || 'unknown'}`,
       status: "active"
     }));
 
     extracted.extractedData.labResults = (extracted.extractedData.labResults || []).map((l: any) => ({
       ...l,
       id: l.id || `lab-${Math.random()}`,
-      date: extracted.visitDate,
+      testDate: extracted.visitDate || new Date().toISOString().split('T')[0],
       docId: docId,
-      visitId: `visit-${extracted.visitDate}`
+      visitId: `visit-${extracted.visitDate || 'unknown'}`,
+      isAbnormal: typeof l.isAbnormal === 'boolean' ? l.isAbnormal : false
     }));
 
     extracted.extractedData.clinicalFindings = (extracted.extractedData.clinicalFindings || []).map((f: any) => ({
       ...f,
-      id: f.id || `find-${Math.random()}`
+      id: f.id || `find-${Math.random()}`,
+      date: extracted.visitDate || new Date().toISOString().split('T')[0],
+      docId: docId,
+      visitId: `visit-${extracted.visitDate || 'unknown'}`
     }));
 
     return NextResponse.json({
@@ -174,7 +251,7 @@ Important Rules:
     });
 
   } catch (error: any) {
-    console.error("API error in extract", error);
+    console.error("[EXTRACT] Unhandled API error:", error);
     return NextResponse.json({ error: error.message || "Failed to process medical document" }, { status: 500 });
   }
 }

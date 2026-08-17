@@ -188,6 +188,23 @@ Allergies: Penicillin`;
             });
             
             if (!response.ok) {
+               const errText = await response.text();
+               let errMsg = "Unknown Error";
+               try {
+                 const errJson = JSON.parse(errText);
+                 errMsg = errJson.error || errText;
+               } catch (e) {
+                 errMsg = errText;
+               }
+               
+               console.error(`Gemini API Error from server: ${response.status} - ${errMsg}`);
+               
+               if (errMsg.includes("Server Error: GEMINI_API_KEY is not configured") || response.status === 500) {
+                 // For critical server config issues, do not fallback to OCR silently because OCR extraction fails without AI format
+                 alert(`Extraction Failed: ${errMsg}`);
+                 continue; // Skip file
+               }
+               
                console.warn("Gemini API Error, falling back to Client-Side OCR for: " + file.name);
                
                if (file.type.startsWith('image/')) {
