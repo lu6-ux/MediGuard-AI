@@ -16,6 +16,19 @@ export const TopBar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+
+  const handleSignOut = async () => {
+    setIsProfileOpen(false);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/signin');
+      router.refresh(); // Force server re-evaluation of middleware and layout
+    } catch (error) {
+      console.error('Failed to sign out', error);
+      alert('Unable to sign out. Please try again.');
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -133,7 +146,7 @@ export const TopBar = () => {
                     <span>{t.userPreferences || 'Preferences'}</span>
                   </button>
                   <button 
-                    onClick={() => setIsProfileOpen(false)}
+                    onClick={handleSignOut}
                     className="w-full text-left px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center space-x-2"
                   >
                     <LogOut className="h-4 w-4" />
