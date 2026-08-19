@@ -233,7 +233,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           rawText: rawOcrText || text,
           cleanedText,
           language,
-          confidenceScores,
+          extractionConfidence: confidenceScores,
           extractedData: extracted,
           status: 'processed',
           uploadDate: new Date().toISOString()

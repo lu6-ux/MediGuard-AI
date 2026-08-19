@@ -27,6 +27,18 @@ MediGuard AI unifies fragmented medical records by processing scanned documents 
 4. Run `npm run dev` to start the development server
 5. Open `http://localhost:3000` in your browser
 
+## Google Maps Platform Setup (For Vercel Deployment)
+
+The Local Doctor Recommendation feature requires the Google Maps Places API.
+
+1. Create a Google Cloud project at [console.cloud.google.com](https://console.cloud.google.com/).
+2. Enable the **Places API (New)** and **Maps JavaScript API**.
+3. Create an API key in **APIs & Services > Credentials**.
+4. Restrict the key to only the APIs you enabled to prevent unauthorized use.
+5. In your local `.env.local` file, add the key: `GOOGLE_MAPS_API_KEY=your_key_here`
+6. For Vercel deployment, navigate to your Vercel Project **Settings > Environment Variables**, and add `GOOGLE_MAPS_API_KEY` to the **Production**, **Preview**, and **Development** environments.
+7. Deploy the application. Never commit `.env` or `.env.local` with real API keys to GitHub.
+
 ## Usage
 
 Simply drag and drop your medical documents (PDFs, JPGs, PNGs) into the Upload section. The system will automatically process the files, extract the relevant clinical information, and update your dashboard, timeline, and safety reports.

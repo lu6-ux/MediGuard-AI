@@ -16,6 +16,7 @@ interface DoctorResult {
   lat: number | null;
   lng: number | null;
   distance?: number;
+  smartScore?: number;
 }
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {

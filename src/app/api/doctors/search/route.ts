@@ -18,15 +18,9 @@ export async function POST(req: Request) {
     // E.g., "cardiologist in Colombo, Sri Lanka"
     let searchQuery = `${specialty} in ${location}, Sri Lanka`;
 
-    // Append temporal filtering if availability and time are provided
-    if (availability && time) {
-      try {
-        const dateObj = new Date(availability);
-        const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' }); // e.g., "Saturday"
-        searchQuery += ` open on ${dayOfWeek} at ${time}`;
-      } catch (e) {
-        console.warn("Failed to parse availability date, ignoring temporal query", e);
-      }
+    // Append temporal filtering if availability is provided
+    if (availability && availability !== 'Flexible') {
+       searchQuery += ` open ${availability.toLowerCase()}`;
     }
 
     const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
