@@ -77,11 +77,11 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
         },
         (err) => {
           console.error(err);
-          alert("We couldn't access your current location. Please enter your city manually.");
+          setError("We couldn't access your current location. Please enter your city manually.");
         }
       );
     } else {
-      alert("Geolocation is not supported by this browser.");
+      setError("Geolocation is not supported by this browser.");
     }
   };
 

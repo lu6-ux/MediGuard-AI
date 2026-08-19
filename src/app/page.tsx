@@ -18,11 +18,14 @@ export default function DashboardPage() {
   const totalMedicines = documents.reduce((acc, doc) => acc + (doc.extractedData?.medications?.length || 0), 0);
   const totalLabReports = documents.filter(d => d.docType === 'lab_report').length;
 
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
+
   const handleDelete = (docId: string) => {
     const isConfirmed = window.confirm(t.deleteConfirmationDesc || 'Are you sure you want to remove this document? This action cannot be undone.');
     if (isConfirmed) {
       removeDocument(docId);
-      alert(t.documentDeletedSuccess || 'Document deleted successfully');
+      setToastMessage(t.documentDeletedSuccess || 'Document deleted successfully');
+      setTimeout(() => setToastMessage(null), 3000);
     }
   };
 
@@ -194,6 +197,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-4 right-4 z-50 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg font-medium animate-in fade-in slide-in-from-bottom-5">
+          {toastMessage}
         </div>
       )}
     </div>

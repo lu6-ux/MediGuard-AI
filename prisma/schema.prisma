@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  documents    MedicalDocument[]
+}
+
+model MedicalDocument {
+  id                 String   @id @default(uuid())
+  userId             String
+  fileName           String
+  docType            String
+  visitDate          String
+  doctorName         String
+  healthcareProvider String
+  rawText            String
+  cleanedText        String?
+  language           String?
+  status             String
+  uploadDate         DateTime @default(now())
+  
+  extractedDataJson  String
+  confidenceJson     String?
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
