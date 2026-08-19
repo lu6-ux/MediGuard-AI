@@ -30,7 +30,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
   flagContext, 
   currentLang = 'en', 
   showRecommender = false,
-  issueDescription = "A potential medical issue was identified."
+  issueDescription
 }) => {
   const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
   
@@ -140,12 +140,12 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
           </div>
           
           <p className="text-sm text-slate-700 dark:text-slate-300">
-            {issueDescription || 'MediGuard AI identified information that may require professional review.'}
+            {issueDescription && issueDescription !== 'A potential medical issue was identified.' ? issueDescription : (t.doctorIssueDescription || 'MediGuard AI identified information that may require professional review.')}
           </p>
 
           <div className="bg-white dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
             <p className="text-xs text-slate-500 uppercase font-semibold mb-1">{t.doctorRecommendedConsultation || 'Recommended consultation'}</p>
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">🩺 {specialty}</p>
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">🩺 {((t as any)[specialty.toLowerCase().replace(/ \/ /g, "_").replace(/ /g, "_")] || specialty)}</p>
           </div>
 
           <button

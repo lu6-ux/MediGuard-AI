@@ -251,10 +251,10 @@ export default function DocumentDetailPage() {
             </section>
           )}
           
-          {/* AI Safety Analysis */}
+          {/* {t.aiSafetyAnalysis || "AI Safety Analysis"} */}
           <section className="pt-8">
              <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                AI Safety Analysis
+                {t.aiSafetyAnalysis || "AI Safety Analysis"}
               </h3>
              <DoctorRecommender 
                 flagContext="general" 
