@@ -45,17 +45,17 @@ export default function DocumentDetailPage() {
   const totalScoredFields = Object.keys(conf).length;
   
   let statusColor = "emerald";
-  let statusTitle = "🟢 Processed Successfully";
+  let statusTitle = `🟢 ${t.statusSuccess || "Successfully Processed"}`;
   let statusDesc = "All vital information was extracted clearly.";
   
   if (totalScoredFields > 0 && uncertainCount > 0) {
     statusColor = "amber";
-    statusTitle = "🟡 Partially Processed";
+    statusTitle = `🟡 ${t.statusPartial || "Partially Processed"}`;
     statusDesc = "Most important information was extracted successfully.\nSome details need verification.";
   } else if (totalScoredFields === 0 || (totalScoredFields > 0 && uncertainCount === totalScoredFields)) {
     statusColor = "rose";
-    statusTitle = "🔴 Needs Manual Review";
-    statusDesc = "We could not confidently extract the structured data. Please verify against the raw document.";
+    statusTitle = `🔴 ${t.statusNeedsReview || "Needs Manual Review"}`;
+    statusDesc = `${t.statusErrorExtract || "We could not confidently extract the structured data."} ${t.statusReviewDoc || "Please verify against the raw document."}`;
   }
 
   return (
@@ -66,7 +66,7 @@ export default function DocumentDetailPage() {
         className="flex items-center space-x-2 text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back to Documents</span>
+        <span>{t.backToDocs || "Back to Documents"}</span>
       </button>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -270,7 +270,7 @@ export default function DocumentDetailPage() {
                 onClick={() => setShowRawText(!showRawText)}
                 className="flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
               >
-                <span>{showRawText ? 'Show Raw OCR Text ▼' : 'Show Raw OCR Text ▼'}</span>
+                <span>{showRawText ? `▼ ${t.docRawHide || 'Hide Raw OCR Text'}` : `▶ ${t.docRawShow || 'Show Raw OCR Text'}`}</span>
               </button>
               
               {showRawText && (

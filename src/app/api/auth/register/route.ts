@@ -34,9 +34,12 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, user: { id: user.id, name: user.name, email: user.email } });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Registration Error:", error);
+    // User-friendly error message that doesn't expose Prisma internals
+    return NextResponse.json({ 
+      error: "We couldn't connect to the server right now. Please try again in a few minutes." 
+    }, { status: 500 });
   }
 }
 

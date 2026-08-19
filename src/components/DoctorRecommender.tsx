@@ -172,7 +172,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
             
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                1. Where are you located?
+                1. {t.doctorWhereLocated || "Where are you located?"}
               </label>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -182,7 +182,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
                   className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${useLiveLocation ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700'}`}
                 >
                   <Crosshair className={`h-5 w-5 mb-1 ${useLiveLocation ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500'}`} />
-                  <span className={`text-sm font-medium ${useLiveLocation ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>Use My Current Location</span>
+                  <span className={`text-sm font-medium ${useLiveLocation ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>{t.useCurrentLocation || "Use My Current Location"}</span>
                 </button>
 
                 <div className={`flex flex-col justify-center p-3 rounded-lg border-2 transition-colors ${!useLiveLocation && locationStr ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700'}`}>
@@ -190,7 +190,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
                     <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                     <input
                       type="text"
-                      placeholder="Or enter city manually..."
+                      placeholder={t.doctorCityPlaceholder || "Or enter city manually..."}
                       value={locationStr}
                       onChange={(e) => {
                         setLocationStr(e.target.value);
@@ -205,7 +205,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
 
             <div className="pt-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                2. When would you like to consult?
+                2. {t.doctorWhenAvailable || "When would you like to consult?"}
               </label>
               <select
                 value={availability}
@@ -230,12 +230,12 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
                 {isSearching ? (
                   <span className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Searching...</span>
+                    <span>{t.doctorSearching || "Searching..."}</span>
                   </span>
                 ) : (
                   <span className="flex items-center space-x-2">
                     <Search className="h-4 w-4" />
-                    <span>🔍 Find Nearby Doctors</span>
+                    <span>🔍 {t.doctorSearchBtn || "Find Nearby Doctors"}</span>
                   </span>
                 )}
               </button>
@@ -253,15 +253,15 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
           {/* Results State */}
           {!isSearching && results !== null && !error && (
             <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-1">Local Healthcare Professionals</h4>
+              <h4 className="font-bold text-slate-900 dark:text-white mb-1">{t.doctorLocalProfessionals || "Local Healthcare Professionals"}</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                {results.length} results found near {reverseGeocodedLocation || (useLiveLocation ? 'your location' : locationStr)}. 
+                {results.length} {t.resultsFound || "results found"} {t.doctorResultsFoundNear || "near"} {reverseGeocodedLocation || (useLiveLocation ? "your location" : locationStr)}. 
               </p>
 
               {results.length === 0 ? (
                 <div className="text-center py-8 px-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950">
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No Suitable Results Found</h4>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">We couldn't find a suitable doctor or clinic near the selected area.</p>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t.doctorNoSuitableFound || "No Suitable Results Found"}</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">{t.doctorNoResultsDesc || "We couldn't find a suitable doctor or clinic near the selected area."}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -339,7 +339,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
       <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-start space-x-2 leading-relaxed bg-slate-100/50 dark:bg-slate-950/50 p-3 rounded-lg">
         <AlertCircle className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
         <p>
-          <strong className="text-slate-700 dark:text-slate-300">Important:</strong> MediGuard AI does not diagnose medical conditions. The recommendation is based on the type of issue flagged in your medical records and is intended to help you find an appropriate healthcare professional for further evaluation.
+          <strong className="text-slate-700 dark:text-slate-300">{t.doctorImportant || "Important:"}</strong> {t.doctorMedicalDisclaimer || "MediGuard AI does not diagnose medical conditions. The recommendation is based on the type of issue flagged in your medical records and is intended to help you find an appropriate healthcare professional for further evaluation."}
         </p>
       </div>
     </div>
