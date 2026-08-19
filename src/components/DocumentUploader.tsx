@@ -139,7 +139,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           rawOcrText = result.document.rawText || "";
           cleanedText = result.document.cleanedText || "";
           language = result.document.language || "";
-          confidenceScores = result.document.confidenceScores || {};
+          confidenceScores = result.document.extractionConfidence || {};
           
           isGeminiProcessed = true;
           text = cleanedText || rawOcrText || "Extracted successfully via Document AI";
