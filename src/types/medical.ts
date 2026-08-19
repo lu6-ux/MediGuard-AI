@@ -53,9 +53,10 @@ export interface ClinicalFinding {
 }
 
 export interface PatientInfo {
-  name: string;
-  age: number;
-  gender: string;
+  name: string | null;
+  age: number | string | null;
+  gender: 'M' | 'F' | 'Unknown' | null;
+  weight?: string | null;
   knownAllergies: string[];
   chronicConditions: string[];
 }

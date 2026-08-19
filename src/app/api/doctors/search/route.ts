@@ -14,9 +14,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Google Maps API key is not configured' }, { status: 500 });
     }
 
+    let searchLocation = location;
+    
+    // Reverse geocode if location is an object with lat/lng
+    if (typeof location === 'object' && location.lat && location.lng) {
+      const geocodeRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${apiKey}`);
+      if (geocodeRes.ok) {
+        const geocodeData = await geocodeRes.json();
+        if (geocodeData.results && geocodeData.results.length > 0) {
+           // Find locality or administrative_area_level_2
+           const addressComponents = geocodeData.results[0].address_components;
+           const cityComponent = addressComponents.find((c: any) => c.types.includes('locality') || c.types.includes('administrative_area_level_2'));
+           if (cityComponent) {
+               searchLocation = cityComponent.long_name;
+           } else {
+               searchLocation = geocodeData.results[0].formatted_address;
+           }
+        }
+      }
+      // If geocoding fails, just fall back to generic Sri Lanka search or something
+      if (typeof searchLocation !== 'string') searchLocation = 'Sri Lanka';
+    }
+
     // Prepare the search query
     // E.g., "cardiologist in Colombo, Sri Lanka"
-    let searchQuery = `${specialty} in ${location}, Sri Lanka`;
+    let searchQuery = `${specialty} in ${searchLocation}`;
+    if (!searchQuery.toLowerCase().includes('sri lanka')) {
+      searchQuery += ', Sri Lanka';
+    }
 
     // Append temporal filtering if availability is provided
     if (availability && availability !== 'Flexible') {
@@ -61,7 +86,7 @@ export async function POST(req: Request) {
       lng: place.location?.longitude || null,
     }));
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ results, reverseGeocodedLocation: typeof location === 'object' ? searchLocation : undefined });
 
   } catch (error) {
     console.error('Error fetching doctors:', error);

@@ -78,7 +78,7 @@ export const TopBar = () => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center overflow-hidden shrink-0 hover:ring-2 ring-emerald-500/50 transition-all focus:outline-none"
             >
-              {patient ? (
+              {patient && patient.name ? (
                 <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                   {patient.name.charAt(0).toUpperCase()}
                 </span>

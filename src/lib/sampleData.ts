@@ -3,7 +3,7 @@ import { MedicalDocument } from '@/types/medical';
 export const YGC_SAMPLE_PATIENT = {
   name: "K. Rajendran",
   age: 58,
-  gender: "Male",
+  gender: "M" as const,
   knownAllergies: ["Penicillin", "Beta-lactam antibiotics"],
   chronicConditions: ["Hypertension", "Prediabetes / Type 2 Diabetes", "Atrial Fibrillation"],
   confidence: "HIGH" as const

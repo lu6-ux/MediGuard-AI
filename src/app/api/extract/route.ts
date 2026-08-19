@@ -67,14 +67,16 @@ Return STRICTLY a JSON object matching this schema. NO markdown wrapping.
     "patientName": 0.0,
     "age": 0.0,
     "gender": 0.0,
+    "weight": 0.0,
     "diagnosis": 0.0,
     "medications": 0.0,
     "vitals": 0.0,
-    "labResults": 0.0
+    "labResults": 0.0,
+    "visitDate": 0.0
   },
   "extractedData": {
     "patient": {
-      "name": "string or null", "age": 0, "gender": "M" | "F" | "Unknown" | null,
+      "name": "string or null", "age": "string or number or null", "gender": "M" | "F" | "Unknown" | null, "weight": "string or null",
       "knownAllergies": ["string"], "chronicConditions": ["string"]
     },
     "vitals": { "bloodPressure": "string or null", "temperature": "string or null" },
