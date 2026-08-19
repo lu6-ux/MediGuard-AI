@@ -1,172 +1,179 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const maxDuration = 60; // Increased duration limit
+// Vercel serverless limits
+export const maxDuration = 60; 
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("[EXTRACT] Request received");
-    
     let body;
     try {
       body = await request.json();
     } catch (e) {
-      console.error("[EXTRACT] JSON parse error on request body", e);
-      return NextResponse.json({ error: 'Invalid JSON request body' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'INVALID_REQUEST', message: 'Invalid JSON request body' }, { status: 400 });
     }
 
-    const { base64Image, mimeType, apiKey: clientApiKey, fileName } = body;
+    const { base64Image, rawText, mimeType, apiKey: clientApiKey, fileName } = body;
 
-    console.log(`[EXTRACT] Filename: ${fileName || 'Unknown'}`);
-    console.log(`[EXTRACT] MIME type: ${mimeType || 'Unknown'}`);
-    
-    if (!base64Image) {
-      console.error("[EXTRACT] Error: base64Image is missing");
+    if (!base64Image && !rawText) {
       return NextResponse.json(
-        { error: 'Missing required parameter: base64Image' },
+        { success: false, error: 'MISSING_PAYLOAD', message: 'Missing required parameter: base64Image or rawText' },
         { status: 400 }
       );
     }
 
-    const estimatedSize = Math.round((base64Image.length * 3) / 4);
-    console.log(`[EXTRACT] File size (estimated bytes): ${estimatedSize}`);
-
     const serverApiKey = process.env.GEMINI_API_KEY;
-    console.log(`[EXTRACT] Gemini configured via server env: ${!!serverApiKey}`);
-    
-    // We prioritize the server environment variable to keep secrets secure.
-    // Fallback to clientApiKey only for legacy compatibility or local debugging if allowed.
     const finalApiKey = serverApiKey || clientApiKey;
 
     if (!finalApiKey) {
-      console.error("[EXTRACT] Error: No Gemini API Key available");
       return NextResponse.json(
-        { error: 'Server Error: GEMINI_API_KEY is not configured on the server.' },
+        { success: false, error: 'SERVER_CONFIGURATION_ERROR', message: 'Server Error: GEMINI_API_KEY is not configured.' },
         { status: 500 }
       );
     }
 
     const prompt = `
 You are an expert medical data extraction AI.
-Read the attached medical document.
-DO NOT fabricate information. If a field is uncertain, extract what you can and set confidence to "LOW" or "MEDIUM".
+Your task is to process the provided medical document (which may be an image or noisy OCR text).
+Follow this pipeline exactly:
 
-Extract the information and format it STRICTLY as a JSON object matching this TypeScript interface.
-DO NOT wrap the output in markdown \`\`\`json blocks. Just return the raw JSON object.
+1. OCR / Text Extraction: Read the text carefully. Preserve document layout, tables, row/column relationships, and sections (especially for prescriptions).
+2. OCR Text Cleaning: Remove meaningless OCR artifacts, corrupted characters, unnecessary spaces, and obvious capitalization errors. Preserve medically meaningful numbers and units.
+3. Medical Entity Extraction: Extract patient info, doctor, hospital, dates, symptoms, vitals, diagnosis, prescriptions, instructions, and follow-up.
+   IMPORTANT FOR MEDICATIONS:
+   - Look for signals: "Prescription", "Rx", "Medicine", "Medication", "Tablet", "Capsule", "mg", "ml", "morning/night", etc.
+   - If medicines are in a table, preserve the row/column mapping.
+   - A medicine is valid if it has a name AND at least one other field (dosage, frequency, duration).
+   - DO NOT reject a medicine just because route or instructions are missing.
+4. Patient Info Extraction: Contextually identify the patient name by looking for labels like "Patient", "Name", "Age". Do not mistake doctor/hospital names for the patient. Do not guess gender unless clear ("M", "Male", "F", "Female", "13Y").
+5. Confidence Scoring: Score confidence for each field from 0.0 to 1.0 (e.g., 0.95). 
+   - High (>0.85): Clearly readable.
+   - Medium (0.70-0.85): Readable but has some noise/typos.
+   - Low (<0.70): Corrupted or barely readable. Mark as uncertain.
 
+DO NOT hallucinate or invent information. If a field cannot be confidently extracted, leave it as an empty string/array, or null.
+DO NOT guess missing information.
+
+Return STRICTLY a JSON object matching this schema. NO markdown wrapping.
 {
+  "rawOcrText": "The raw extracted text with all noise",
+  "cleanedText": "The cleaned, normalized text",
+  "language": "en | si | ta | mixed",
   "docType": "prescription" | "lab_report" | "doctor_note" | "discharge_summary" | "other",
   "visitDate": "YYYY-MM-DD" | "Unknown",
   "doctorName": "string or Unknown",
   "healthcareProvider": "string or Unknown",
+  "extractionConfidence": {
+    "patientName": 0.0,
+    "age": 0.0,
+    "gender": 0.0,
+    "diagnosis": 0.0,
+    "medications": 0.0,
+    "vitals": 0.0,
+    "labResults": 0.0
+  },
   "extractedData": {
     "patient": {
-      "name": "string",
-      "age": 0,
-      "gender": "M" | "F" | "Unknown",
-      "knownAllergies": ["string"],
-      "chronicConditions": ["string"]
+      "name": "string or null", "age": 0, "gender": "M" | "F" | "Unknown" | null,
+      "knownAllergies": ["string"], "chronicConditions": ["string"]
     },
+    "vitals": { "bloodPressure": "string or null", "temperature": "string or null" },
+    "symptoms": ["string"],
+    "diagnosis": ["string"],
+    "instructions": ["string"],
+    "followUpDate": "string or null",
     "medications": [
       {
         "id": "generate random string",
-        "name": "string",
-        "dosage": "string",
-        "frequency": "string",
-        "duration": "string",
-        "confidence": "HIGH" | "MEDIUM" | "LOW"
+        "name": "string", "dosage": "string", "frequency": "string", "duration": "string", "route": "string", "instructions": "string"
       }
     ],
     "labResults": [
       {
         "id": "generate random string",
-        "testName": "string",
-        "value": "string or number",
-        "unit": "string",
-        "referenceRange": "string",
-        "isAbnormal": boolean,
-        "confidence": "HIGH" | "MEDIUM" | "LOW"
+        "testName": "string", "value": "string or number", "unit": "string", "referenceRange": "string",
+        "isAbnormal": true
       }
     ],
     "clinicalFindings": [
       {
         "id": "generate random string",
         "type": "symptom" | "diagnosis" | "vital_sign" | "other",
-        "description": "string",
-        "value": "string",
-        "confidence": "HIGH" | "MEDIUM" | "LOW"
+        "description": "string", "value": "string"
       }
     ],
-    "doctorNotes": ["string (Any general clinical notes, findings, or advice)"],
+    "doctorNotes": ["string"],
     "recommendations": ["string"]
   }
 }
-
-Important Rules:
-1. "medications": Do not return "NO MEDICATIONS DETECTED". If none exist, return an empty array []. If text is unreadable but looks like a medication, extract your best guess and mark confidence "LOW".
-2. "labResults": Find lab values even if they are buried inside paragraphs.
-3. "clinicalFindings": Extract symptoms, diagnoses, and vital signs separately from medications.
 `;
 
-    // Remove data:image/... prefix if present
-    const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
-
-    let geminiModel = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim().replace(/['"]/g, '');
-    if (geminiModel.includes('1.0-pro-vision')) {
-        geminiModel = "gemini-3.6-flash";
-    }
-    console.log(`[EXTRACT] Selected Gemini Model: ${geminiModel}`);
+    const geminiModel = process.env.GEMINI_MODEL || "gemini-2.5-flash"; // updated default model
 
     let resultText = null;
     let lastError: any = null;
     const maxRetries = 3;
     
+    // Bounded exponential backoff only for 429
     for (let i = 0; i < maxRetries; i++) {
       try {
         const genAI = new GoogleGenerativeAI(finalApiKey);
         const model = genAI.getGenerativeModel({ model: geminiModel });
 
-        console.log(`[EXTRACT] Sending request via GoogleGenerativeAI SDK to ${geminiModel} (Attempt ${i + 1})`);
-        const result = await model.generateContent([
-          prompt,
-          {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000); 
+
+        const contentParts: any[] = [prompt];
+        
+        if (base64Image) {
+          const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
+          contentParts.push({
             inlineData: {
               data: cleanBase64,
               mimeType: mimeType || 'image/jpeg'
             }
-          }
-        ]);
+          });
+        } else if (rawText) {
+          contentParts.push(rawText);
+        }
+
+        const result = await model.generateContent(contentParts, { signal: controller.signal } as any);
+        
+        clearTimeout(timeoutId);
         
         const response = await result.response;
         resultText = response.text();
-        console.log(`[EXTRACT] Model ${geminiModel} succeeded`);
         break; // Success!
         
       } catch (err: any) {
-        console.error(`[EXTRACT] Gemini SDK error for ${geminiModel}`);
-        console.error(`[EXTRACT] Message: ${err?.message || 'Unknown'}`);
         lastError = err;
-        if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // 2s delay
+        
+        // Timeout Error handling
+        if (err.name === 'AbortError' || err.message.includes('fetch failed') || err.message.includes('timeout')) {
+          console.error("[EXTRACT] Gemini request timed out");
+          return NextResponse.json({ success: false, error: 'DOCUMENT_PROCESSING_TIMEOUT', message: 'The document took too long to process. Please try again or upload a clearer/smaller document.' }, { status: 504 });
         }
+
+        // Only retry on 429 (Rate Limit) or 503 (Service Unavailable)
+        if (err.message.includes('429') || err.message.includes('503')) {
+          if (i < maxRetries - 1) {
+            const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        
+        // If it's a 400, 403, 500, fail immediately without retrying
+        return NextResponse.json({ success: false, error: 'API_ERROR', message: err.message }, { status: 500 });
       }
     }
 
     if (!resultText) {
-      console.error("[EXTRACT] All retries failed.");
-      return NextResponse.json({ error: `SDK_ERROR: ${lastError?.message || 'All retries failed'}` }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'API_ERROR', message: `SDK_ERROR: ${lastError?.message || 'Failed after retries'}` }, { status: 500 });
     }
 
-    if (!resultText) {
-      console.error("[EXTRACT] Gemini model returned empty text");
-      return NextResponse.json({ error: "Gemini model returned empty text" }, { status: 500 });
-    }
-
-    console.log(`[EXTRACT] Parsing JSON output...`);
-    
     // Robust JSON Extraction
     let jsonString = resultText.trim();
-    
     const jsonMatch = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (jsonMatch && jsonMatch[1]) {
         jsonString = jsonMatch[1].trim();
@@ -181,50 +188,19 @@ Important Rules:
     let extracted;
     try {
       extracted = JSON.parse(jsonString);
-      console.log(`[EXTRACT] Response parsed: true`);
     } catch (parseError) {
-      console.error(`[EXTRACT] Response parsed: false`);
-      console.error(`[EXTRACT] Parse Error:`, parseError);
-      console.error(`[EXTRACT] Output to parse was:`, resultText.substring(0, 500) + '...');
-      return NextResponse.json({ error: "SCHEMA_VALIDATION_ERROR: Failed to parse Gemini output as JSON" }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'SCHEMA_VALIDATION_ERROR', message: "Failed to parse AI output." }, { status: 500 });
     }
 
     const docId = `doc-${Date.now()}`;
-    
-    // Ensure nested objects exist to avoid undefined errors
-    if (!extracted.extractedData) {
-       extracted.extractedData = {};
-    }
+    if (!extracted.extractedData) extracted.extractedData = {};
     
     extracted.extractedData.medications = (extracted.extractedData.medications || []).map((m: any) => ({
-      ...m,
-      id: m.id || `med-${Math.random()}`,
-      startDate: extracted.visitDate || new Date().toISOString().split('T')[0],
-      prescribedBy: extracted.doctorName || "Unknown",
-      docId: docId,
-      visitId: `visit-${extracted.visitDate || 'unknown'}`,
-      status: "active"
+      ...m, id: m.id || `med-${Math.random()}`, docId: docId
     }));
-
     extracted.extractedData.labResults = (extracted.extractedData.labResults || []).map((l: any) => ({
-      ...l,
-      id: l.id || `lab-${Math.random()}`,
-      testDate: extracted.visitDate || new Date().toISOString().split('T')[0],
-      docId: docId,
-      visitId: `visit-${extracted.visitDate || 'unknown'}`,
-      isAbnormal: typeof l.isAbnormal === 'boolean' ? l.isAbnormal : false
+      ...l, id: l.id || `lab-${Math.random()}`, docId: docId
     }));
-
-    extracted.extractedData.clinicalFindings = (extracted.extractedData.clinicalFindings || []).map((f: any) => ({
-      ...f,
-      id: f.id || `find-${Math.random()}`,
-      date: extracted.visitDate || new Date().toISOString().split('T')[0],
-      docId: docId,
-      visitId: `visit-${extracted.visitDate || 'unknown'}`
-    }));
-
-    extracted.extractedData.doctorNotes = extracted.extractedData.doctorNotes || [];
-    extracted.extractedData.recommendations = extracted.extractedData.recommendations || [];
 
     return NextResponse.json({
       success: true,
@@ -235,12 +211,15 @@ Important Rules:
         visitDate: extracted.visitDate || new Date().toISOString().split('T')[0],
         doctorName: extracted.doctorName || "Unknown",
         healthcareProvider: extracted.healthcareProvider || "Unknown",
+        rawText: extracted.rawOcrText || "",
+        cleanedText: extracted.cleanedText || "",
+        language: extracted.language || "en",
+        extractionConfidence: extracted.extractionConfidence || {},
         extractedData: extracted.extractedData
       }
     });
 
   } catch (error: any) {
-    console.error("[EXTRACT] Unhandled API error:", error);
-    return NextResponse.json({ error: `UNKNOWN_EXTRACTION_ERROR: ${error.message || "Failed to process medical document"}` }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'UNKNOWN_ERROR', message: "An unexpected error occurred." }, { status: 500 });
   }
 }

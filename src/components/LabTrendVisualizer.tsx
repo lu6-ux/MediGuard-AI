@@ -4,18 +4,22 @@ import React, { useState } from 'react';
 import { Activity, TrendingUp, AlertCircle, CheckCircle, Info, Sparkles } from 'lucide-react';
 import { LabTrend } from '@/types/medical';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, CartesianGrid } from 'recharts';
+import { useMedical } from '@/context/MedicalContext';
+import { TRANSLATIONS } from '@/lib/i18n/translations';
 
 interface LabTrendVisualizerProps {
   labTrends: LabTrend[];
 }
 
 export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrends }) => {
+  const { currentLang } = useMedical();
+  const t = TRANSLATIONS[currentLang];
   const [selectedMetric, setSelectedMetric] = useState<string>(labTrends[0]?.metricName || 'Fasting Blood Sugar');
 
-  const currentTrend = labTrends.find(t => t.metricName === selectedMetric) || labTrends[0];
+  const currentTrend = labTrends.find(trend => trend.metricName === selectedMetric) || labTrends[0];
 
   if (!currentTrend) {
-    return <div className="p-6 text-center text-slate-400">No laboratory trend data available.</div>;
+    return <div className="p-6 text-center text-slate-400">{t.emptyLabs || 'No laboratory results available.'}</div>;
   }
 
   const chartData = currentTrend.dataPoints.map(dp => ({
@@ -32,7 +36,7 @@ export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrend
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <Activity className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-            <span>Longitudinal Laboratory Result Trends</span>
+            <span>{t.labTrendTitle || 'Longitudinal Laboratory Result Trends'}</span>
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Track test values drifting over time across multiple medical visits
@@ -68,7 +72,7 @@ export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrend
                 <span>{currentTrend.metricName}</span>
                 <span className="text-sm font-normal text-slate-500 dark:text-slate-400">({currentTrend.unit})</span>
               </h3>
-              <span className="text-sm text-slate-500 dark:text-slate-400">Normal Range: {currentTrend.referenceRange}</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{t.referenceRange || 'Normal Range'}: {currentTrend.referenceRange}</span>
             </div>
 
             <span className={`px-3 py-1.5 rounded-md text-sm font-bold capitalize flex items-center space-x-1 ${
@@ -77,7 +81,7 @@ export const LabTrendVisualizer: React.FC<LabTrendVisualizerProps> = ({ labTrend
                 : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
             }`}>
               <TrendingUp className="h-4 w-4" />
-              <span>{currentTrend.trendDirection} Trend</span>
+              <span>{t[`trend${currentTrend.trendDirection.charAt(0).toUpperCase() + currentTrend.trendDirection.slice(1)}`] || currentTrend.trendDirection} {t.trend || 'Trend'}</span>
             </span>
           </div>
 

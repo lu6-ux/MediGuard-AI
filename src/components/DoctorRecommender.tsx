@@ -36,10 +36,14 @@ import { TRANSLATIONS } from '@/lib/i18n/translations';
 interface DoctorRecommenderProps {
   flagContext: string; // E.g., 'allergy_contradiction', 'drug_interaction', 'lab_abnormality'
   currentLang?: Language;
+  highRiskAlerts?: number;
 }
 
-export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContext, currentLang = 'en' }) => {
+export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({ flagContext, currentLang = 'en', highRiskAlerts = 0 }) => {
   const t = TRANSLATIONS[currentLang];
+  
+  if (highRiskAlerts === 0) return null;
+
   const [location, setLocation] = useState('');
   const [availability, setAvailability] = useState('');
   const [time, setTime] = useState('');

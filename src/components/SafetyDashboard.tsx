@@ -118,8 +118,8 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
         </div>
       </div>
 
-      {/* Local Doctor Recommendation (Shown for any risk to ensure visibility during demo) */}
-      <DoctorRecommender flagContext={latestClinicalFindings || (alerts.length > 0 ? alerts[0].type : 'general')} currentLang={currentLang} />
+      {/* Local Doctor Recommendation */}
+      <DoctorRecommender flagContext={latestClinicalFindings || (alerts.length > 0 ? alerts[0].type : 'general')} currentLang={currentLang} highRiskAlerts={riskScore.highRiskCount} />
 
       {/* Safety Alerts List */}
       <div className="space-y-4">
@@ -128,7 +128,24 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
           <span>{t.safetyCrossCheckFlags} ({alerts.length})</span>
         </h3>
 
-        {alerts.map((alert) => (
+        {alerts.length === 0 ? (
+          <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center flex flex-col items-center justify-center">
+            {riskScore.totalMedicationsAnalyzed === 0 ? (
+              <>
+                <Info className="h-10 w-10 text-slate-400 mb-3" />
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t.notAvailable}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t.noSafetyChecks}</p>
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-10 w-10 text-emerald-500 mb-3" />
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t.noUrgentConcerns}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t.emptyAlerts}</p>
+              </>
+            )}
+          </div>
+        ) : (
+          alerts.map((alert) => (
           <div 
             key={alert.id}
             className={`glass-panel rounded-2xl p-5 border transition-all ${
@@ -178,7 +195,7 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
             </div>
 
           </div>
-        ))}
+        )))}
       </div>
 
     </div>

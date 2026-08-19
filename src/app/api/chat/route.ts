@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
       visitDate: doc.visitDate,
       provider: doc.healthcareProvider,
       doctor: doc.doctorName,
-      extractedData: doc.extractedData
+      extractedData: doc.extractedData,
+      rawOcrText: doc.rawText // INCLUDE RAW TEXT FOR FALLBACK
     }));
 
     const prompt = `
@@ -35,16 +36,21 @@ You are MediGuard AI, an expert medical reasoning assistant.
 The user is asking a question about their medical history.
 Language to answer in: ${language || 'en'} (en=English, si=Sinhala, ta=Tamil)
 
-Here is the complete chronological patient timeline extracted from multiple documents:
+Here is the complete chronological patient timeline extracted from multiple documents.
+Note: Some fields in "extractedData" may be empty if structured extraction failed. If you don't find the answer in "extractedData", YOU MUST thoroughly search the "rawOcrText" before concluding the information is missing.
+
 ${JSON.stringify(patientTimeline, null, 2)}
 
 Question: "${question}"
 
 Instructions:
 1. Answer the question accurately using ONLY the provided timeline data.
-2. If the data is missing, say so. Do not hallucinate.
-3. For every claim you make, you MUST provide a citation array referencing the "docId" or "fileName" where you found the information.
-4. If asked about changes over time, compare the earliest and latest visits.
+2. Distinguish "No Data" from "Extraction Failed". 
+   - If you can't find medications in "extractedData", look in "rawOcrText".
+   - If they are in "rawOcrText" but not structured, say: "I found possible medication entries in the document, but they require verification." and list them from OCR.
+   - If they are NOT in "rawOcrText" either, say: "No medications were identified in the available medical records."
+3. Never invent missing information (medications, diagnoses, lab results, patient info).
+4. For every claim you make, you MUST provide a citation array referencing the "docId" or "docName" where you found the information.
 5. Provide a confidenceScore between 0 and 100 based on how explicitly the answer is stated in the text.
 
 Output a valid JSON object matching exactly this structure:

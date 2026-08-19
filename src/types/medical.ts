@@ -7,8 +7,6 @@ export type DocumentType =
   | 'discharge_summary'
   | 'other';
 
-export type ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW';
-
 export interface Medication {
   id: string;
   name: string;
@@ -25,7 +23,6 @@ export interface Medication {
   sourceDocument?: string;
   status: 'active' | 'changed' | 'discontinued';
   notes?: string;
-  confidence?: ConfidenceLevel;
 }
 
 export interface LabResult {
@@ -42,7 +39,6 @@ export interface LabResult {
   docId: string;
   visitId: string;
   sourceDocument?: string;
-  confidence?: ConfidenceLevel;
 }
 
 export interface ClinicalFinding {
@@ -54,7 +50,6 @@ export interface ClinicalFinding {
   docId: string;
   visitId: string;
   sourceDocument?: string;
-  confidence?: ConfidenceLevel;
 }
 
 export interface PatientInfo {
@@ -63,7 +58,6 @@ export interface PatientInfo {
   gender: string;
   knownAllergies: string[];
   chronicConditions: string[];
-  confidence?: ConfidenceLevel;
 }
 
 export interface ExtractedData {
@@ -73,6 +67,14 @@ export interface ExtractedData {
   clinicalFindings?: ClinicalFinding[];
   doctorNotes?: string;
   recommendations?: string[];
+  vitals?: {
+    bloodPressure?: string;
+    temperature?: string;
+  };
+  symptoms?: string[];
+  diagnosis?: string[];
+  instructions?: string[];
+  followUpDate?: string;
 }
 
 export interface MedicalDocument {
@@ -83,7 +85,10 @@ export interface MedicalDocument {
   doctorName: string;
   healthcareProvider: string;
   rawText: string;
+  cleanedText?: string;
+  language?: string;
   extractedData: ExtractedData;
+  extractionConfidence?: Record<string, number>;
   status: 'uploaded' | 'processing' | 'processed' | 'error';
   uploadDate: string;
 }
