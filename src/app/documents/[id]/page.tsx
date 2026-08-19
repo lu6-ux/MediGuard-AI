@@ -120,12 +120,12 @@ export default function DocumentDetailPage() {
           </div>
         </div>
         
-        {/* Local Doctor Recommendation for Low Confidence */}
+        {/* Local Doctor Recommendation for Low Confidence / Testing */}
         <DoctorRecommender 
           flagContext="general" 
           currentLang={currentLang} 
-          showRecommender={uncertainCount > 0} 
-          issueDescription={t.doctorLowConfidenceIssue || 'Some medical information could not be clearly read from the document. We recommend consulting a healthcare professional to verify these details.'}
+          showRecommender={true} 
+          issueDescription={uncertainCount > 0 ? (t.doctorLowConfidenceIssue || 'Some medical information could not be clearly read from the document. We recommend consulting a healthcare professional to verify these details.') : (t.doctorRecommendedConsultation || 'Consultation recommended to verify document details.')}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">

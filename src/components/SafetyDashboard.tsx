@@ -122,8 +122,8 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
       <DoctorRecommender 
         flagContext={latestClinicalFindings || (alerts.length > 0 ? alerts[0].type : 'general')} 
         currentLang={currentLang} 
-        showRecommender={riskScore.highRiskCount > 0} 
-        issueDescription={alerts.length > 0 ? alerts[0].title : 'A high-risk medical issue was detected in your records.'}
+        showRecommender={true} 
+        issueDescription={alerts.length > 0 ? alerts[0].title : t.doctorRecommendedConsultation || 'Consultation recommended based on recent health data.'}
       />
 
       {/* Safety Alerts List */}
