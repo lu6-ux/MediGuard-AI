@@ -201,7 +201,37 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     summaryRecommendation: "Recommendation:",
     summaryLabDriftTitle: "Longitudinal Lab Drift Summary",
     summaryClinicalNoteTitle: "Clinical Note for Attending Physician & Pharmacist:",
-    summaryClinicalNoteDesc: "This report was compiled by MediGuard AI to highlight potential prescription conflicts across multi-provider visits. Please verify the allergy status and review co-prescriptions prior to dispensing."
+    summaryClinicalNoteDesc: "This report was compiled by MediGuard AI to highlight potential prescription conflicts across multi-provider visits. Please verify the allergy status and review co-prescriptions prior to dispensing.",
+
+    // Doctor Recommender
+    doctorPotentialIssue: "⚠️ Potential Issue Detected",
+    doctorRecommendedConsultation: "Recommended consultation",
+    doctorFindLocalBtn: "Find a Local Doctor",
+    doctorWhereLocated: "Where are you located?",
+    doctorCityPlaceholder: "Enter your city or area",
+    doctorWhenAvailable: "When are you available for a consultation?",
+    doctorAvailToday: "Today",
+    doctorAvailWeek: "This week",
+    doctorAvailWeekend: "Weekends",
+    doctorAvailEvenings: "Evenings",
+    doctorAvailFlexible: "Flexible",
+    doctorSearching: "Searching...",
+    doctorSearchBtn: "Search Doctors",
+    doctorSearchUnavailable: "Doctor Search Temporarily Unavailable",
+    doctorLocalProfessionals: "Local Healthcare Professionals",
+    doctorResultsFoundNear: "results found near",
+    doctorRankingExplanation: "Recommended based on specialty match and proximity.",
+    doctorNoSuitableFound: "No Suitable Results Found",
+    doctorNoResultsDesc: "We couldn't find a suitable doctor or clinic near the selected area.",
+    doctorSearchAnotherArea: "Search another area",
+    doctorSpecialtyLabel: "Specialty:",
+    doctorViewOnMap: "View on Map",
+    doctorGetDirections: "Directions",
+    doctorCall: "Call",
+    doctorImportant: "Important:",
+    doctorMedicalDisclaimer: "MediGuard AI does not diagnose medical conditions. The recommendation is based on the type of issue flagged in your medical records and is intended to help you find an appropriate healthcare professional for further evaluation. If you are experiencing severe or emergency symptoms, seek urgent medical care instead of relying on this recommendation.",
+    doctorLowConfidenceIssue: "Some medical information could not be clearly read from the document. We recommend consulting a healthcare professional to verify these details."
+
   },
   si: {
     appTitle: "MediGuard AI",

@@ -119,7 +119,12 @@ export const SafetyDashboard: React.FC<SafetyDashboardProps> = ({ alerts, riskSc
       </div>
 
       {/* Local Doctor Recommendation */}
-      <DoctorRecommender flagContext={latestClinicalFindings || (alerts.length > 0 ? alerts[0].type : 'general')} currentLang={currentLang} highRiskAlerts={riskScore.highRiskCount} />
+      <DoctorRecommender 
+        flagContext={latestClinicalFindings || (alerts.length > 0 ? alerts[0].type : 'general')} 
+        currentLang={currentLang} 
+        showRecommender={riskScore.highRiskCount > 0} 
+        issueDescription={alerts.length > 0 ? alerts[0].title : 'A high-risk medical issue was detected in your records.'}
+      />
 
       {/* Safety Alerts List */}
       <div className="space-y-4">

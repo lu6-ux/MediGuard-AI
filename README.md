@@ -13,6 +13,7 @@ MediGuard AI unifies fragmented medical records by processing scanned documents 
 
 - **Document Analysis**: Seamlessly extracts structured clinical data from scanned documents, prescriptions, and lab reports.
 - **Prescription Safety**: Automatically cross-references newly prescribed medications against a patient's historical allergies and existing drug regimens to flag potential adverse interactions.
+- **Local Doctor Recommendation**: Intelligently identifies when a patient requires professional consultation (due to high-risk prescription flags or low-confidence AI extraction) and matches them with a specialized local healthcare professional or clinic based on proximity, rating, and availability using real-world public data APIs.
 - **Medical Timeline**: Reconstructs a patient's journey chronologically, linking diagnoses, prescriptions, and lab tests across multiple visits and providers.
 - **Lab Trends**: Tracks and visualizes key biomarkers over time, making it easy to identify deteriorating or improving health conditions.
 - **Medical Assistant**: An intelligent assistant that helps users quickly query their medical history, understand changes in their health, and clarify medical terminology.

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useMedical } from '@/context/MedicalContext';
 import { TRANSLATIONS } from '@/lib/i18n/translations';
 import { ArrowLeft, FileText, Calendar, User, Activity, AlertCircle, Pill, FileCode, AlertTriangle } from 'lucide-react';
+import { DoctorRecommender } from '@/components/DoctorRecommender';
 
 export default function DocumentDetailPage() {
   const params = useParams();
@@ -118,8 +119,16 @@ export default function DocumentDetailPage() {
             ) : null}
           </div>
         </div>
+        
+        {/* Local Doctor Recommendation for Low Confidence */}
+        <DoctorRecommender 
+          flagContext="general" 
+          currentLang={currentLang} 
+          showRecommender={uncertainCount > 0} 
+          issueDescription={t.doctorLowConfidenceIssue || 'Some medical information could not be clearly read from the document. We recommend consulting a healthcare professional to verify these details.'}
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
           
           <div className="space-y-8">
             {/* Patient Info */}
