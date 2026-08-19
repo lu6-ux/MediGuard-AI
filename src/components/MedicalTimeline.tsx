@@ -103,7 +103,7 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
             onClick={() => setFilterType('all')}
             className={`px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition flex-1 sm:flex-none ${filterType === 'all' ? 'bg-emerald-500 text-white dark:text-slate-950' : 'text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'}`}
           >
-            {t?.timelineAllVisits ? `${t.timelineAllVisits} (${sortedVisits.length})` : `All Visits (${sortedVisits.length})`}
+            {t?.timelineAllVisits ? `${t?.timelineAllVisits} (${sortedVisits.length})` : `All Visits (${sortedVisits.length})`}
           </button>
           <button
             onClick={() => setFilterType('prescription')}
@@ -170,19 +170,19 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
                   <div className="p-5 space-y-5 border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-950/40">
                     
                     {hasNoData && (
-                       <div className="text-sm text-slate-500 italic">No structured data found for this visit.</div>
+                       <div className="text-sm text-slate-500 italic">{t?.noStructuredData || "No structured data found for this visit."}</div>
                     )}
 
                     {hasFindings && (
                       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-2">
                           Clinical Findings
-                          {visit.confidence.symptoms < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">Needs verification</span>}
+                          {visit.confidence.symptoms < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">{t?.needsVerification || "Needs verification"}</span>}
                         </h4>
                         <ul className="list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1">
-                          {symptoms.length > 0 && <li>Symptoms: {symptoms.join(', ')}</li>}
-                          {visit.vitals.bloodPressure && <li>Blood pressure: {visit.vitals.bloodPressure} {visit.confidence.vitals < 0.70 && <span className="text-amber-500 text-xs ml-1">(Needs verification)</span>}</li>}
-                          {visit.vitals.temperature && <li>Temperature: {visit.vitals.temperature} {visit.confidence.vitals < 0.70 && <span className="text-amber-500 text-xs ml-1">(Needs verification)</span>}</li>}
+                          {symptoms.length > 0 && <li>{t?.symptoms || "Symptoms"}: {symptoms.join(', ')}</li>}
+                          {visit.vitals.bloodPressure && <li>{t?.bloodPressure || "Blood pressure"}: {visit.vitals.bloodPressure} {visit.confidence.vitals < 0.70 && <span className="text-amber-500 text-xs ml-1">({t?.needsVerification || "Needs verification"})</span>}</li>}
+                          {visit.vitals.temperature && <li>{t?.temperature || "Temperature"}: {visit.vitals.temperature} {visit.confidence.vitals < 0.70 && <span className="text-amber-500 text-xs ml-1">({t?.needsVerification || "Needs verification"})</span>}</li>}
                         </ul>
                       </div>
                     )}
@@ -191,7 +191,7 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
                       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-2">
                           Diagnosis
-                          {visit.confidence.diagnosis < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">Needs verification</span>}
+                          {visit.confidence.diagnosis < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">{t?.needsVerification || "Needs verification"}</span>}
                         </h4>
                         <ul className="list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1">
                           {diagnosis.map((d, i) => <li key={i}>{d}</li>)}
@@ -203,16 +203,16 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
                       <div>
                         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-3">
                           Prescription
-                          {visit.confidence.medications < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">Needs verification</span>}
+                          {visit.confidence.medications < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">{t?.needsVerification || "Needs verification"}</span>}
                         </h4>
                         <div className="overflow-x-auto">
                           <table className="w-full text-left border-collapse bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                             <thead>
                               <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-400">
-                                <th className="py-3 px-4">Medicine</th>
-                                <th className="py-3 px-4">Dosage</th>
-                                <th className="py-3 px-4">Frequency</th>
-                                <th className="py-3 px-4">Duration</th>
+                                <th className="py-3 px-4">{t?.medicine || "Medicine"}</th>
+                                <th className="py-3 px-4">{t?.dosage || "Dosage"}</th>
+                                <th className="py-3 px-4">{t?.frequency || "Frequency"}</th>
+                                <th className="py-3 px-4">{t?.duration || "Duration"}</th>
                               </tr>
                             </thead>
                             <tbody className="text-sm">
@@ -234,7 +234,7 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
                       <div>
                         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-3">
                           Lab Results
-                          {visit.confidence.labResults < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">Needs verification</span>}
+                          {visit.confidence.labResults < 0.70 && <span className="ml-2 text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">{t?.needsVerification || "Needs verification"}</span>}
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {labs.map(lab => (
@@ -251,8 +251,8 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
                                 <span className="font-bold">{lab.value} {lab.unit}</span>
                               </div>
                               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex justify-between">
-                                <span>Ref: {lab.referenceRange}</span>
-                                {lab.isAbnormal && <span className="text-amber-600 dark:text-amber-400 font-bold">Elevated</span>}
+                                <span>{t?.referenceRange || "Reference Range"}: {lab.referenceRange}</span>
+                                {lab.isAbnormal && <span className="text-amber-600 dark:text-amber-400 font-bold">{t?.elevated || "Elevated"}</span>}
                               </div>
                             </div>
                           ))}
@@ -262,7 +262,7 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
 
                     {instructions.length > 0 && (
                       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-2">Instructions</h4>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-2">{t?.instructions || "Instructions"}</h4>
                         <ul className="list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1">
                           {instructions.map((ins, i) => <li key={i}>{ins}</li>)}
                         </ul>
@@ -271,7 +271,7 @@ export const MedicalTimeline: React.FC<MedicalTimelineProps> = ({ documents, t }
 
                     {followUps.length > 0 && (
                       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-1">Follow-up</h4>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-300 mb-1">{t?.followUp || "Follow-up"}</h4>
                         <p className="text-sm text-slate-700 dark:text-slate-300">
                           {followUps.join(', ')}
                         </p>

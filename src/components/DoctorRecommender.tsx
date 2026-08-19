@@ -160,13 +160,13 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Stethoscope className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Find a Doctor Near You</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t.doctorFindNearYouTitle || "Find a Doctor Near You"}</h3>
             </div>
             <button onClick={() => setExpanded(false)} className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
               {t.cancel || 'Cancel'}
             </button>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Find a healthcare professional based on the recommended specialty and your location.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{t.doctorFindNearYouDesc || "Find a healthcare professional based on the recommended specialty and your location."}</p>
           
           <form onSubmit={handleSearch} className="space-y-4 bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
             
@@ -213,7 +213,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
                 className="w-full md:w-1/2 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 appearance-none"
               >
                 <option value="Today">{t.doctorAvailToday || 'Today'}</option>
-                <option value="Tomorrow">Tomorrow</option>
+                <option value="Tomorrow">{t.tomorrow || "Tomorrow"}</option>
                 <option value="This week">{t.doctorAvailWeek || 'This week'}</option>
                 <option value="Weekends">{t.doctorAvailWeekend || 'Weekends'}</option>
                 <option value="Evenings">{t.doctorAvailEvenings || 'Evenings'}</option>
@@ -281,7 +281,7 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
                             <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300">
                               <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                               <span className="font-semibold text-slate-900 dark:text-white">{doc.rating}</span>
-                              <span className="text-xs text-slate-400">({doc.ratingCount} reviews)</span>
+                              <span className="text-xs text-slate-400">({doc.ratingCount} {t.reviews || "reviews"})</span>
                             </div>
                           ) : null}
 

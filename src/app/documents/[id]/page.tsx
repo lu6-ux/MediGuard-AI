@@ -20,9 +20,9 @@ export default function DocumentDetailPage() {
   if (!document) {
     return (
       <div className="max-w-4xl mx-auto py-12 text-center">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Document not found</h2>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t.docNotFound || "Document not found"}</h2>
         <button onClick={() => router.push('/documents')} className="mt-4 text-emerald-600 hover:underline">
-          &larr; Back to documents
+          &larr; {t.backToDocs || "Back to documents"}
         </button>
       </div>
     );
@@ -109,31 +109,31 @@ export default function DocumentDetailPage() {
             {hasPatientData && (
               <div className="flex items-center space-x-2">
                 {isConfident('patientName') ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                <span>Patient information</span>
+                <span>{t.patientInfo || "Patient information"}</span>
               </div>
             )}
             {ex.diagnosis && ex.diagnosis.length > 0 && (
               <div className="flex items-center space-x-2">
                 {isConfident('diagnosis') ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                <span>Diagnosis</span>
+                <span>{t.diagnosis || "Diagnosis"}</span>
               </div>
             )}
             {ex.patient?.weight && (
               <div className="flex items-center space-x-2">
                 {isConfident('weight') ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                <span>Weight</span>
+                <span>{t.weight || "Weight"}</span>
               </div>
             )}
             {ex.medications && ex.medications.length > 0 && (
               <div className="flex items-center space-x-2">
                 {isConfident('medications') ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                <span>{isConfident('medications') ? 'Prescription details' : 'Some prescription details need verification'}</span>
+                <span>{isConfident('medications') ? 'Prescription details' : '{t.prescriptionNeedsVerification || "Some prescription details need verification"}'}</span>
               </div>
             )}
             {!isConfident('visitDate') && (
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <span>Visit date needs verification</span>
+                <span>{t.visitDateNeedsVerification || "Visit date needs verification"}</span>
               </div>
             )}
           </div>
@@ -151,7 +151,7 @@ export default function DocumentDetailPage() {
                 {ex.patient?.name && (
                   <div>
                     <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 mb-1">
-                      <span className="text-xs font-semibold">👤 Patient Name</span>
+                      <span className="text-xs font-semibold">👤 {t.patientName || "Patient Name"}</span>
                     </div>
                     <div className="font-medium text-slate-900 dark:text-white">
                       {ex.patient.name}
@@ -161,7 +161,7 @@ export default function DocumentDetailPage() {
                 {ex.patient?.age && (
                   <div>
                     <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 mb-1">
-                      <span className="text-xs font-semibold">🎂 Age</span>
+                      <span className="text-xs font-semibold">🎂 {t.age || "Age"}</span>
                     </div>
                     <div className="font-medium text-slate-900 dark:text-white">
                       {ex.patient.age.toString().includes('year') ? ex.patient.age : `${ex.patient.age} years`}
@@ -171,7 +171,7 @@ export default function DocumentDetailPage() {
                 {ex.patient?.gender && (
                   <div>
                     <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 mb-1">
-                      <span className="text-xs font-semibold">⚥ Gender</span>
+                      <span className="text-xs font-semibold">⚥ {t.gender || "Gender"}</span>
                     </div>
                     <div className="font-medium text-slate-900 dark:text-white">
                       {ex.patient.gender}
@@ -181,7 +181,7 @@ export default function DocumentDetailPage() {
                 {ex.patient?.weight && (
                   <div>
                     <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 mb-1">
-                      <span className="text-xs font-semibold">⚖️ Weight</span>
+                      <span className="text-xs font-semibold">⚖️ {t.weight || "Weight"}</span>
                     </div>
                     <div className="font-medium text-slate-900 dark:text-white">
                       {ex.patient.weight}
@@ -220,22 +220,22 @@ export default function DocumentDetailPage() {
                 {ex.medications.map((med: any, i: number) => (
                   <div key={i} className="flex flex-col py-2 border-b border-slate-100 dark:border-slate-800/50 last:border-0">
                     <div className="mb-2">
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">Medicine {i + 1}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">{t.medicine || "Medicine"} {i + 1}</div>
                       <div className="font-semibold text-slate-900 dark:text-white text-base">
-                        {med.name || <span className="text-amber-600 italic text-sm">Needs verification</span>}
+                        {med.name || <span className="text-amber-600 italic text-sm">{t.needsVerification || "Needs verification"}</span>}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="block text-xs text-slate-500 dark:text-slate-400">Strength</span>
+                        <span className="block text-xs text-slate-500 dark:text-slate-400">{t.strength || "Strength"}</span>
                         <span className="font-medium text-slate-800 dark:text-slate-200">{med.dosage || <span className="text-amber-600 italic text-xs">Needs verification</span>}</span>
                       </div>
                       <div>
-                        <span className="block text-xs text-slate-500 dark:text-slate-400">Frequency</span>
+                        <span className="block text-xs text-slate-500 dark:text-slate-400">{t.frequency || "Frequency"}</span>
                         <span className="font-medium text-slate-800 dark:text-slate-200">{med.frequency || <span className="text-amber-600 italic text-xs">Needs verification</span>}</span>
                       </div>
                       <div>
-                        <span className="block text-xs text-slate-500 dark:text-slate-400">Duration</span>
+                        <span className="block text-xs text-slate-500 dark:text-slate-400">{t.duration || "Duration"}</span>
                         <span className="font-medium text-slate-800 dark:text-slate-200">{med.duration || <span className="text-amber-600 italic text-xs">Needs verification</span>}</span>
                       </div>
                     </div>
@@ -245,7 +245,7 @@ export default function DocumentDetailPage() {
 
               {!isConfident('medications') && (
                 <div className="mt-4 flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300">
-                  <span>⚠ Some medicine information needs verification.</span>
+                  <span>⚠ {t.someMedicineNeedsVerification || "Some medicine information needs verification."}</span>
                 </div>
               )}
             </section>
@@ -276,7 +276,7 @@ export default function DocumentDetailPage() {
               {showRawText && (
                 <div className="mt-4 bg-slate-900 rounded-xl p-4 overflow-x-auto">
                   <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap">
-                    {document.rawText || "No raw text available."}
+                    {document.rawText || t.noRawText || "No raw text available."}
                   </pre>
                 </div>
               )}
