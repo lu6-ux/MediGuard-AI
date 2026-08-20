@@ -8,7 +8,7 @@ import { FileText, Activity, ShieldAlert, Calendar, Pill, Plus, Clock, Trash2, A
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const { documents, removeDocument, currentLang, safetyData } = useMedical();
+  const { documents, removeDocument, currentLang, safetyData, isDocumentsLoaded } = useMedical();
   const t = TRANSLATIONS[currentLang];
 
   const recentDocs = [...documents].reverse().slice(0, 5);

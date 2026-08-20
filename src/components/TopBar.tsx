@@ -9,7 +9,7 @@ import { TRANSLATIONS } from '@/lib/i18n/translations';
 
 export const TopBar = () => {
   const { theme, setTheme } = useTheme();
-  const { currentLang, setCurrentLang, documents } = useMedical();
+  const { currentLang, setCurrentLang, documents, clearState } = useMedical();
   const t = TRANSLATIONS[currentLang];
   const pathname = usePathname();
   const router = useRouter();
@@ -21,6 +21,7 @@ export const TopBar = () => {
     setIsProfileOpen(false);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
+      clearState();
       router.push('/signin');
       router.refresh(); // Force server re-evaluation of middleware and layout
     } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getSession } from "@/lib/auth";
 
 // Vercel serverless limits
 export const maxDuration = 60; 

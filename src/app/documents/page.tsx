@@ -8,7 +8,7 @@ import { FileText, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DocumentsPage() {
-  const { documents, addDocuments, removeDocument, currentLang } = useMedical();
+  const { documents, addDocuments, removeDocument, currentLang, isDocumentsLoaded } = useMedical();
   const t = TRANSLATIONS[currentLang];
 
   const handleDelete = (docId: string) => {

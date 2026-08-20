@@ -6,6 +6,8 @@ import { analyzePrescriptionSafety } from '@/lib/ai/safetyEngine';
 import { analyzeLabTrends } from '@/lib/ai/labEngine';
 
 interface MedicalContextType {
+  clearState: () => void;
+  isDocumentsLoaded: boolean;
   documents: MedicalDocument[];
   addDocuments: (newDocs: MedicalDocument[]) => void;
   removeDocument: (docId: string) => void;
@@ -19,8 +21,10 @@ interface MedicalContextType {
 const MedicalContext = createContext<MedicalContextType | undefined>(undefined);
 
 export function MedicalProvider({ children }: { children: React.ReactNode }) {
+
   const [documents, setDocuments] = useState<MedicalDocument[]>([]);
   const [currentLang, setCurrentLangState] = useState<Language>('en');
+  const [isDocumentsLoaded, setIsDocumentsLoaded] = useState(false);
 
   // Load language from localStorage on mount
   useEffect(() => {
@@ -38,15 +42,68 @@ export function MedicalProvider({ children }: { children: React.ReactNode }) {
   const [safetyData, setSafetyData] = useState<{alerts: any[], riskScore: any} | null>(null);
   const [isAnalyzingSafety, setIsAnalyzingSafety] = useState(false);
 
-  const addDocuments = (newDocs: MedicalDocument[]) => {
+  // Fetch documents on mount
+  useEffect(() => {
+    async function fetchDocs() {
+      try {
+        const res = await fetch('/api/documents');
+        if (res.ok) {
+          const data = await res.json();
+          setDocuments(data);
+        } else {
+          setDocuments([]); // probably unauthenticated
+        }
+      } catch (e) {
+        console.error('Failed to fetch docs:', e);
+      } finally {
+        setIsDocumentsLoaded(true);
+      }
+    }
+    fetchDocs();
+  }, []);
+
+  const addDocuments = async (newDocs: MedicalDocument[]) => {
+    // Optimistic UI update
     setDocuments(prev => [...prev, ...newDocs]);
+    
+    // Persist to backend
+    try {
+      const res = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDocs)
+      });
+      if (!res.ok) {
+        throw new Error("Failed to save documents");
+      }
+      const savedDocs = await res.json();
+      // Update with backend generated IDs if necessary, or just rely on UUIDs generated locally
+    } catch (e) {
+      console.error(e);
+      // Rollback on failure (simplified)
+      setDocuments(prev => prev.filter(d => !newDocs.find(nd => nd.id === d.id)));
+      alert("Failed to save documents to database");
+    }
   };
 
-  const removeDocument = (docId: string) => {
+  const removeDocument = async (docId: string) => {
+    // Optimistic UI
     setDocuments(prev => prev.filter(d => d.id !== docId));
+    
+    try {
+      await fetch(`/api/documents/${docId}`, { method: 'DELETE' });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const clearState = () => {
+    setDocuments([]);
+    setSafetyData(null);
   };
 
   useEffect(() => {
+
     async function runSafetyAnalysis() {
       if (documents.length === 0) {
         setSafetyData(null);
