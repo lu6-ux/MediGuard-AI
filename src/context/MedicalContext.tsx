@@ -168,7 +168,9 @@ export function MedicalProvider({ children }: { children: React.ReactNode }) {
       setCurrentLang,
       safetyData,
       isAnalyzingSafety,
-      labTrends
+      labTrends,
+      clearState,
+      isDocumentsLoaded
     }}>
       {children}
     </MedicalContext.Provider>
