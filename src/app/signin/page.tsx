@@ -2,17 +2,24 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldAlert, ArrowRight } from "lucide-react";
+import { ShieldAlert, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { useMedical } from "@/context/MedicalContext";
 
 export default function SignIn() {
   const router = useRouter();
+  const { clearState } = useMedical();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    // Clear old state before signing in just to be safe
+    clearState();
+
     const res = await fetch("/api/auth/login", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
@@ -21,7 +28,7 @@ export default function SignIn() {
       window.location.href = "/documents";
     } else {
       const data = await res.json();
-      setError(data.error || "Failed to sign in");
+      setError(data.error || "Invalid email or password");
     }
   };
 
@@ -31,7 +38,7 @@ export default function SignIn() {
         <div className="flex justify-center mb-6 text-emerald-600">
           <ShieldAlert className="h-12 w-12" />
         </div>
-        <h2 className="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-slate-100">Sign in to MediGuard AI</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-slate-100">Welcome Back</h2>
         
         {error && <div className="p-3 mb-4 text-sm text-rose-600 bg-rose-50 rounded-lg">{error}</div>}
 
@@ -42,7 +49,23 @@ export default function SignIn() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
-            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                required 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                className="w-full px-4 py-2 border rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white pr-10" 
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
           <button type="submit" className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
             Sign In <ArrowRight className="h-4 w-4" />
