@@ -67,7 +67,12 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
         })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("AI service is currently unavailable.");
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to get AI response");
@@ -90,9 +95,9 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
       const errorMsg: ChatMessage = {
         id: `ai-error-${Date.now()}`,
         sender: "ai",
-        text: `Error: ${error.message}. Please check your API key and try again.`,
+        text: `${error.message}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        confidenceScore: 0,
+        confidenceScore: undefined,
         originalQuery: query
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -161,9 +166,11 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ documents, cur
                       <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       <span className="text-emerald-600 dark:text-emerald-400">MediGuard AI</span>
                     </span>
-                    <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 font-semibold text-xs">
-                      {msg.confidenceScore}% {t.confidence}
-                    </span>
+                    {msg.confidenceScore !== undefined && (
+                      <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 font-semibold text-xs">
+                        {msg.confidenceScore}% {t.confidence}
+                      </span>
+                    )}
                   </div>
                   <div className="whitespace-pre-line text-sm font-normal">
                     {msg.text}

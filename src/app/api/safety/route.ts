@@ -6,7 +6,8 @@ export const maxDuration = 30; // Max serverless function duration
 
 export async function POST(request: NextRequest) {
   try {
-    const { medications, allergies, apiKey } = await request.json();
+    const { medications, allergies } = await request.json();
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!medications || !apiKey) {
       return NextResponse.json(

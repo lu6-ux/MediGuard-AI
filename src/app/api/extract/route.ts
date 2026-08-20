@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'INVALID_REQUEST', message: 'Invalid JSON request body' }, { status: 400 });
     }
 
-    const { base64Image, rawText, mimeType, apiKey: clientApiKey, fileName } = body;
+    const { base64Image, rawText, mimeType, fileName } = body;
 
     if (!base64Image && !rawText) {
       return NextResponse.json(
@@ -24,8 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const serverApiKey = process.env.GEMINI_API_KEY;
-    const finalApiKey = serverApiKey || clientApiKey;
+    const finalApiKey = process.env.GEMINI_API_KEY;
 
     if (!finalApiKey) {
       return NextResponse.json(

@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getSession } from "@/lib/auth";
 
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
-    const { question, documents, apiKey, language } = await req.json();
+    const { question, documents, language } = await req.json();
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!question) {
       return NextResponse.json({ error: "question parameter is required" }, { status: 400 });
     }
 
     if (!apiKey) {
-      return NextResponse.json({ error: "apiKey is required for RAG reasoning" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "AI service is currently unavailable. GEMINI_API_KEY is not configured on the server." }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -113,6 +115,6 @@ Do NOT output markdown \`\`\`json blocks. Return ONLY raw JSON.
 
   } catch (error: any) {
     console.error("API error in chat", error);
-    return NextResponse.json({ error: error.message || "Failed to answer question" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "AI service is currently unavailable." }, { status: 500 });
   }
 }
