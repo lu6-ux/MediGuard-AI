@@ -131,7 +131,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 
           if (!response.ok) {
             const errRes = await response.json().catch(() => null);
-            throw new Error(errRes?.error || 'DOCUMENT_PROCESSING_ERROR');
+            throw new Error(errRes?.message || errRes?.error || 'DOCUMENT_PROCESSING_ERROR');
           }
 
           const result = await response.json();
@@ -221,7 +221,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         }
 
         setProgressStatus(`Saving results...`);
-        const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+        const newDocId = crypto.randomUUID();
         
         newProcessedDocs.push({
           id: newDocId,
