@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSession } from "@/lib/auth";
+import crypto from "crypto";
 
 // Vercel serverless limits
 export const maxDuration = 60; 
@@ -195,14 +196,14 @@ Return STRICTLY a JSON object matching this schema. NO markdown wrapping.
       return NextResponse.json({ success: false, error: 'SCHEMA_VALIDATION_ERROR', message: "Failed to parse AI output." }, { status: 500 });
     }
 
-    const docId = `doc-${Date.now()}`;
+    const docId = crypto.randomUUID();
     if (!extracted.extractedData) extracted.extractedData = {};
     
     extracted.extractedData.medications = (extracted.extractedData.medications || []).map((m: any) => ({
-      ...m, id: m.id || `med-${Math.random()}`, docId: docId
+      ...m, id: m.id || crypto.randomUUID(), docId: docId
     }));
     extracted.extractedData.labResults = (extracted.extractedData.labResults || []).map((l: any) => ({
-      ...l, id: l.id || `lab-${Math.random()}`, docId: docId
+      ...l, id: l.id || crypto.randomUUID(), docId: docId
     }));
 
     return NextResponse.json({

@@ -142,11 +142,17 @@ export function MedicalProvider({ children }: { children: React.ReactNode }) {
           const json = await res.json();
           setSafetyData(json.data);
         } else {
-          setSafetyData(analyzePrescriptionSafety(documents));
+          setSafetyData({
+            alerts: [],
+            riskScore: { score: 0, riskLevel: 'Error', summary: 'AI analysis is currently unavailable. Please try again.', isError: true }
+          });
         }
       } catch (e) {
         console.error(e);
-        setSafetyData(analyzePrescriptionSafety(documents));
+        setSafetyData({
+          alerts: [],
+          riskScore: { score: 0, riskLevel: 'Error', summary: 'AI analysis is currently unavailable. Please try again.', isError: true }
+        });
       } finally {
         setIsAnalyzingSafety(false);
       }

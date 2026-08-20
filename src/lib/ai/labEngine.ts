@@ -61,14 +61,14 @@ export function analyzeLabTrends(documents: MedicalDocument[]): LabTrend[] {
 
     if (metricName.toLowerCase().includes('blood sugar') || metricName.toLowerCase().includes('glucose')) {
       if (lastVal > maxNormal) {
-        explanation = `Fasting Blood Sugar shows a steady, progressive upward drift over 4 consecutive medical visits (from ${firstVal} mg/dL in Jan 2025 up to ${lastVal} mg/dL in Jun 2026). The latest value of ${lastVal} mg/dL crosses the diagnostic threshold for Type 2 Diabetes (>126 mg/dL). Clinical monitoring and glycemic adjustment recommended.`;
+        explanation = `Fasting Blood Sugar shows a steady, progressive upward drift over 4 consecutive medical visits (from ${firstVal} mg/dL up to ${lastVal} mg/dL across the monitored period). The latest value of ${lastVal} mg/dL crosses the diagnostic threshold for Type 2 Diabetes (>126 mg/dL). Clinical monitoring and glycemic adjustment recommended.`;
         confidenceScore = 96;
       } else {
         explanation = `Fasting Blood Sugar remains within manageable limits (${lastVal} mg/dL).`;
       }
     } else if (metricName.toLowerCase().includes('creatinine')) {
       if (lastVal > maxNormal) {
-        explanation = `Serum Creatinine has drifted upwards from a baseline of ${firstVal} mg/dL (Jan 2025) to ${lastVal} mg/dL (Jun 2026). The current level exceeds the upper normal limit of ${maxNormal} mg/dL, indicating a potential early reduction in renal filtration clearance. Dose adjustment for nephrotoxic or renal-cleared medications should be reviewed with a doctor.`;
+        explanation = `Serum Creatinine has drifted upwards from a baseline of ${firstVal} mg/dL to ${lastVal} mg/dL. The current level exceeds the upper normal limit of ${maxNormal} mg/dL, indicating a potential early reduction in renal filtration clearance. Dose adjustment for nephrotoxic or renal-cleared medications should be reviewed with a doctor.`;
         confidenceScore = 94;
       } else {
         explanation = `Serum Creatinine is currently ${lastVal} mg/dL, hovering near the upper normal reference limit of ${maxNormal} mg/dL.`;
