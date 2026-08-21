@@ -66,20 +66,21 @@ export const DoctorRecommender: React.FC<DoctorRecommenderProps> = ({
 
   const handleUseCurrentLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoords({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          setUseLiveLocation(true);
-          setLocationStr('');
-        },
-        (err) => {
-          console.error(err);
-          setError("We couldn't access your current location. Please enter your city manually.");
-        }
-      );
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setCoords({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+            setUseLiveLocation(true);
+            setLocationStr('');
+          },
+          (err) => {
+            console.error(err);
+            setError("We couldn't access your current location. Please enter your city manually.");
+          },
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
     } else {
       setError("Geolocation is not supported by this browser.");
     }
